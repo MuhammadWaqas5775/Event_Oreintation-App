@@ -59,6 +59,9 @@ child: ListView(
     ListTile(
       leading: Icon(Icons.settings),
       title: Text("Settings"),
+      onTap: (){
+        Navigator.pushNamed(context,'/settings');
+      },
     ),
     ListTile(
       leading: Icon(Icons.logout),

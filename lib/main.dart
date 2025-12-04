@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ueo_app/AboutUs.dart';
 import 'Loginscreen.dart';
 import 'HomePage.dart';
 import 'MainPage.dart';
 import 'Memories.dart';
 import 'Profile.dart';
 import 'Map.dart';
+import 'Settings.dart';
+import 'AboutUs.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -33,6 +37,8 @@ class _MyAppState extends State<MyApp> {
         "/Memories":(context)=> Memories(),
         "/Map":(context)=>Map(),
         "/Profile":(context)=>Profile(),
+        "/Settings": (context) => Settings(),
+        "/AboutUs": (context) => AboutUs(),
       },
       debugShowCheckedModeBanner: false,
 
@@ -49,6 +55,7 @@ class _SignupscreenState extends State<Signupscreen> {
   final email=TextEditingController();
   final password=TextEditingController();
   final confirmpassword=TextEditingController();
+
 final _formkey=GlobalKey<FormState>();
 bool isobscurepassword=true;
 bool isobscureconfirmpassword=true;
