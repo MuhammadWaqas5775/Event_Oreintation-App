@@ -23,7 +23,7 @@ class _SettingsState extends State<Settings> {
       title: Text('About Us'),
       leading: Icon(Icons.question_mark),
       onTap: (){
-        Navigator.pushNamed(context, 'AboutUs');
+        Navigator.pushNamed(context, '/AboutUs');
       },
     ),
     ListTile(

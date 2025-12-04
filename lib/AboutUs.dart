@@ -6,16 +6,27 @@ class AboutUs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            child: Image(image:
-            NetworkImage("https://moellim.com/wp-content/uploads/2025/02/2019-09-07-780x470.jpg")),
-          ),
-          Text(
-            'The Riphah University Event Management System is a mobile application designed to streamline event organization within Riphah International University. It allows students, faculty, and organizers to easily view upcoming events, register for activities, receive notifications, and manage event details in one place. Our goal is to create a modern, efficient, and user-friendly platform that enhances communication and participation across the university.'
-          ),
-        ],
+      appBar: AppBar(
+        backgroundColor: Colors.purple,
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+
+              ),
+              child: Image(image:
+              NetworkImage("https://moellim.com/wp-content/uploads/2025/02/2019-09-07-780x470.jpg")),
+            ),
+            Text(
+              'The Riphah University Event Management System is a mobile application designed to streamline event organization within Riphah International University. It allows students, faculty, and organizers to easily view upcoming events, register for activities, receive notifications, and manage event details in one place. Our goal is to create a modern, efficient, and user-friendly platform that enhances communication and participation across the university.'
+            ),
+          ],
+        ),
       ),
     );
   }

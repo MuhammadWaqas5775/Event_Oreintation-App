@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ueo_app/AboutUs.dart';
 import 'Loginscreen.dart';
 import 'HomePage.dart';
 import 'MainPage.dart';
@@ -9,7 +8,6 @@ import 'Profile.dart';
 import 'Map.dart';
 import 'Settings.dart';
 import 'AboutUs.dart';
-
 void main() {
   runApp(const MyApp());
 }
@@ -38,7 +36,7 @@ class _MyAppState extends State<MyApp> {
         "/Map":(context)=>Map(),
         "/Profile":(context)=>Profile(),
         "/Settings": (context) => Settings(),
-        "/AboutUs": (context) => AboutUs(),
+        "/AboutUs": (context) =>AboutUs(),
       },
       debugShowCheckedModeBanner: false,
 

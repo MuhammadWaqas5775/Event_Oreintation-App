@@ -60,7 +60,7 @@ child: ListView(
       leading: Icon(Icons.settings),
       title: Text("Settings"),
       onTap: (){
-        Navigator.pushNamed(context,'/settings');
+        Navigator.pushNamed(context,"/Settings");
       },
     ),
     ListTile(
