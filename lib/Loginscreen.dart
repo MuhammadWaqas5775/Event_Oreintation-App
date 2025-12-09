@@ -1,8 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
-import 'MainPage.dart';
-
 class Loginscreen extends StatefulWidget {
   const Loginscreen({super.key});
 
@@ -11,12 +9,6 @@ class Loginscreen extends StatefulWidget {
 }
 
 class _LoginscreenState extends State<Loginscreen> {
-  Future<void> setlogedin()async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool("islogedin", true);
-    final bool? islogedin =prefs.getBool("islogedin");
-    print("login: $islogedin");
-  }
   bool ischecked = false;
   String eemail = "";
   String epassword = "";
@@ -24,20 +16,25 @@ class _LoginscreenState extends State<Loginscreen> {
   final password = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   bool isobscurepassword = true;
+  Future<void> logein()async {
+   try{
+     await FirebaseAuth.instance.signInWithEmailAndPassword(
+         email: email.text,
+         password: password.text
+     );
+if(ischecked){
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setBool("remember", true);
+  prefs.setString("email", email.text.trim());
+}
+Navigator.pushNamed(context,"/MainPage");
+   }on FirebaseAuthException catch(e){
+     print("error");
+}
+   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loaddata();
-  }
 
-  Future<void> _loaddata() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      eemail = prefs.getString("email") ?? "";
-      epassword = prefs.getString("password") ?? "";
-    });
-  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -77,16 +74,13 @@ class _LoginscreenState extends State<Loginscreen> {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        Text("Email: $eemail"),
+
                         TextFormField(
                           controller: email,
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Please enter your email";
-                            } else if (value != eemail) {
-                              return "Invalid email";
                             }
-                            return null;
                           },
                           decoration: const InputDecoration(
                             labelText: "Email",
@@ -101,10 +95,7 @@ class _LoginscreenState extends State<Loginscreen> {
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Please enter your password";
-                            } else if (value != epassword) {
-                              return "Invalid password";
                             }
-                            return null;
                           },
                           decoration:  InputDecoration(
                             labelText: "Password",
@@ -157,8 +148,7 @@ class _LoginscreenState extends State<Loginscreen> {
                           ),
                           onPressed: () {
                             if (_formkey.currentState!.validate()) {
-                              setlogedin();
-                              Navigator.pushNamed(context,"/MainPage");
+                              logein();
                             }
                           },
                           child: const Text(
@@ -172,7 +162,7 @@ class _LoginscreenState extends State<Loginscreen> {
                         const SizedBox(height: 25),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                      children: [
                             const Text("Don't have an account?"),
                             TextButton(
                               onPressed: () {
