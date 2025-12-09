@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280800985858",
+    "project_id": "ueoapp",
+    "storage_bucket": "ueoapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280800985858:android:03320184cf3306837af81b",
+        "android_client_info": {
+          "package_name": "com.example.ueo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuwY6hPgwHxZpdp8AodV1Bzei9QrNeX6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
