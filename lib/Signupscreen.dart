@@ -60,7 +60,7 @@ class _SignupscreenState extends State<Signupscreen> {
           ),
         );
       }
-      print("Firebase Error: ${e.code} → ${e.message}");
+      print("Firebase Error: \${e.code} → \${e.message}");
     }
   }
 
@@ -80,18 +80,26 @@ class _SignupscreenState extends State<Signupscreen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(40.0),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple,
+          Positioned(
+            top:0,
+            child: Container(
+              height:MediaQuery.of(context).size.height*0.25,
+              width:MediaQuery.of(context).size.width,
+              padding: EdgeInsets.all(40.0),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/background.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              // child: Text("Get Started",style: TextStyle(fontSize: 2,fontWeight: FontWeight.bold,color: Colors.white),)
             ),
-            // child: Text("Get Started",style: TextStyle(fontSize: 2,fontWeight: FontWeight.bold,color: Colors.white),)
           ),
           Positioned(
             bottom: 1,
             child: Container(
-                width: 390,
-                height: 700,
+                width:MediaQuery.of(context).size.width,
+                height:MediaQuery.of(context).size.height*0.8,
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -134,7 +142,7 @@ class _SignupscreenState extends State<Signupscreen> {
                                   return "Please enter your email";
                                 }
                                 final emailregex = RegExp(
-                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                    r'^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$');
                                 if (!emailregex.hasMatch(value)) {
                                   return "Please enter a valid email";
                                 }
@@ -212,7 +220,7 @@ class _SignupscreenState extends State<Signupscreen> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   minimumSize: Size(300, 50),
-                                  backgroundColor: Colors.deepPurple),
+                                  backgroundColor: Colors.deepOrange[100]),
                               onPressed: () {
                                 // Moved validation check inside the signup function
                                 signup();
@@ -247,8 +255,9 @@ class _SignupscreenState extends State<Signupscreen> {
                       ),
                     ),
                   ),
-                )),
-          )
+                )
+            ),
+          ),
         ],
       ),
     );

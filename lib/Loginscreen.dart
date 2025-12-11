@@ -39,12 +39,24 @@ Navigator.pushNamed(context,"/MainPage");
     return Center(
       child: Stack(
         children: [
-          Container(color: Colors.deepPurple),
+          Positioned(
+            top: 0,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.25,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/background.png"),
+                    fit: BoxFit.cover,
+                  )
+                ),
+              )
+          ),
           Positioned(
             bottom: 1,
             child: Container(
-              width: 390,
-              height: 700,
+              height: MediaQuery.of(context).size.height * 0.8,
+              width: MediaQuery.of(context).size.width,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -139,7 +151,7 @@ Navigator.pushNamed(context,"/MainPage");
                         const SizedBox(height: 30),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: Colors.deepOrange[100],
                             minimumSize: const Size(300, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
