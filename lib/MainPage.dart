@@ -1,9 +1,14 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ueo_app/HomePage.dart';
 import 'package:ueo_app/Loginscreen.dart';
 import 'Memories.dart';
-import 'Map.dart';
+import 'Map.dart' as map_widget;
 import 'Profile.dart';
 
 class MainPage extends StatefulWidget {
@@ -12,10 +17,77 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 class _MainPageState extends State<MainPage> {
+  File? _image;
+  String? _imageUrl;
+  late final CloudinaryPublic cloudinary;
+  final User? user = FirebaseAuth.instance.currentUser;
+  late final DocumentReference<Map<String, dynamic>> _userDoc;
+
+  @override
+  void initState() {
+    super.initState();
+    cloudinary = CloudinaryPublic('dcfpfknn1', 'ueoapp', cache: false);
+    if (user != null) {
+      _userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+      _loadProfileImage();
+    }
+  }
+
+  Future<void> _loadProfileImage() async {
+    try {
+      final snapshot = await _userDoc.get();
+      if (snapshot.exists) {
+        setState(() {
+          _imageUrl = snapshot.data()?['profileImageUrl'];
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load profile image: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    if (user == null) return;
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      _uploadToCloudinary();
+    }
+  }
+
+  Future<void> _uploadToCloudinary() async {
+    if (_image == null || user == null) return;
+
+    try {
+      final response = await cloudinary.uploadFile(
+        CloudinaryFile.fromFile(_image!.path, resourceType: CloudinaryResourceType.Image),
+      );
+      final imageUrl = response.secureUrl;
+      await _userDoc.set({'profileImageUrl': imageUrl}, SetOptions(merge: true));
+      setState(() {
+        _imageUrl = imageUrl;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to upload image: $e'),
+        ),
+      );
+    }
+  }
+
 List pages=[
   HomePage(),
   Memories(),
-  Map(),
+  map_widget.Map(),
   Profile(),
   Loginscreen(),
 ];
@@ -25,6 +97,7 @@ var currentindex=0;
       currentindex=index;
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +105,13 @@ var currentindex=0;
 child: ListView(
   children: [
     DrawerHeader(decoration: BoxDecoration(color: Colors.deepPurple),
-    child: CircleAvatar(),
+    child: GestureDetector(
+      onTap: _pickImage,
+      child: CircleAvatar(
+        backgroundImage: _imageUrl != null ? NetworkImage(_imageUrl!) : null,
+        child: _imageUrl == null && _image == null ? Icon(Icons.person) : null,
+      ),
+    ),
     ),
     ListTile(
       leading: Icon(Icons.home),
@@ -41,14 +120,6 @@ child: ListView(
         Navigator.pushNamed(context,"/MainPage");
       },
     ),
-// ListTile(
-//   leading: Icon(Icons.search),
-//   title: Text("Search"),
-// ),
-//     ListTile(
-//       leading: Icon(Icons.favorite),
-//       title: Text("Favorite"),
-//     ),
     ListTile(
       leading: Icon(Icons.person),
       title: Text("Profile"),
@@ -67,7 +138,7 @@ child: ListView(
       leading: Icon(Icons.logout),
       title: Text("Logout"),
       onTap: (){
-        Navigator.pushNamed(context,"/");
+        Navigator.pushNamedAndRemoveUntil(context, '/', ( route) => false);
       },
     ),
   ],
@@ -77,10 +148,9 @@ child: ListView(
         backgroundColor: Colors.deepPurple,
       ),
       body: pages[currentindex],
-      bottomNavigationBar: Container(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 15.0),
-          child: GNav(
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 15.0),
+        child: GNav(
             backgroundColor: Colors.white,
             color: Colors.black,
             activeColor: Colors.white,
@@ -109,7 +179,6 @@ child: ListView(
               });
             },
           ),
-        ),
       ),
     );
   }

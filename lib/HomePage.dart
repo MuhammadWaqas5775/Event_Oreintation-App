@@ -63,9 +63,6 @@ class _HomePageState extends State<HomePage> {
           children:[ Container(
             width:double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage(""),fit: BoxFit.cover),
-            ),
             child: Column(
               children: [
                 SizedBox(height: 50,),

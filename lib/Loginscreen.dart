@@ -7,7 +7,6 @@ class Loginscreen extends StatefulWidget {
   @override
   State<Loginscreen> createState() => _LoginscreenState();
 }
-
 class _LoginscreenState extends State<Loginscreen> {
   bool ischecked = false;
   String eemail = "";

@@ -1,41 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ueo_app/theme_provider.dart';
 import 'AboutUs.dart';
 
-class Settings extends StatefulWidget {
+class Settings extends StatelessWidget {
   const Settings({super.key});
 
   @override
-  State<Settings> createState() => _SettingsState();
-}
-
-class _SettingsState extends State<Settings> {
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.purple,
-        title: Text("Settings"),
-      ),
-      body: ListView(
-        children: [
-      ListTile(
-      title: Text('About Us'),
-      leading: Icon(Icons.question_mark),
-      onTap: (){
-        Navigator.pushNamed(context, '/AboutUs');
-      },
-    ),
-    ListTile(
-      title: Text('Logout'),
-      leading: Icon(Icons.logout),
-      onTap: (){
-          Navigator.pushNamed(context, '/');
-      },
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
-    ),
-        ]
-    )
-    );
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.purple,
+          title: const Text("Settings"),
+        ),
+        body: ListView(children: [
+          SwitchListTile(
+            title: const Text('Dark Mode'),
+            secondary: Icon(themeProvider.getIsDarkTheme ? Icons.dark_mode : Icons.light_mode),
+            value: themeProvider.getIsDarkTheme,
+            onChanged: (bool value) {
+              themeProvider.setDarkTheme(value);
+            },
+          ),
+          ListTile(
+            title: const Text('About Us'),
+            leading: const Icon(Icons.question_mark),
+            onTap: () {
+              Navigator.pushNamed(context, '/AboutUs');
+            },
+          ),
+          ListTile(
+            title: const Text('Logout'),
+            leading: const Icon(Icons.logout),
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            },
+          ),
+        ]));
   }
 }
