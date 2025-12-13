@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ueo_app/HomePage.dart';
 import 'package:ueo_app/Loginscreen.dart';
 import 'Memories.dart';
-import 'Map.dart' as map_widget;
+import 'Mapscreen.dart';
 import 'Profile.dart';
 
 class MainPage extends StatefulWidget {
@@ -87,7 +87,7 @@ class _MainPageState extends State<MainPage> {
 List pages=[
   HomePage(),
   Memories(),
-  map_widget.Map(),
+  Mapscreen(),
   Profile(),
   Loginscreen(),
 ];

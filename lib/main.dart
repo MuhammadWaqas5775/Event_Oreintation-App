@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ueo_app/SplashScreen.dart';
 import 'package:ueo_app/theme_provider.dart';
 import 'Loginscreen.dart';
 import 'Signupscreen.dart';
@@ -8,7 +9,7 @@ import 'HomePage.dart';
 import 'MainPage.dart';
 import 'Memories.dart';
 import 'Profile.dart';
-import 'Map.dart';
+import 'Mapscreen.dart';
 import 'Settings.dart';
 import 'AboutUs.dart';
 
@@ -35,14 +36,15 @@ class MyApp extends StatelessWidget {
             brightness: themeProvider.getIsDarkTheme ? Brightness.dark : Brightness.light,
             primarySwatch: Colors.purple,
           ),
-          initialRoute: "/",
+          initialRoute: "/splash",
           routes: {
+            "/splash": (context) => SplashScreen(),
             "/": (context) => Loginscreen(),
             "/Signupscreen": (context) => Signupscreen(),
             "/MainPage": (context) => MainPage(),
             "/HomePage": (context) => HomePage(),
             "/Memories": (context) => Memories(),
-            "/Map": (context) => Map(),
+            "/Map": (context) => Mapscreen(),
             "/Profile": (context) => Profile(),
             "/Settings": (context) => Settings(),
             "/AboutUs": (context) => AboutUs(),

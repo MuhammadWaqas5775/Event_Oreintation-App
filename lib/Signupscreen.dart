@@ -142,7 +142,7 @@ class _SignupscreenState extends State<Signupscreen> {
                                   return "Please enter your email";
                                 }
                                 final emailregex = RegExp(
-                                    r'^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$');
+                                    r'^[a-zA-Z0-9._%+-]+@([\\w-]+\\.)+[\\w-]\$');
                                 if (!emailregex.hasMatch(value)) {
                                   return "Please enter a valid email";
                                 }
