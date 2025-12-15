@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // 1. Import Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Signupscreen extends StatefulWidget {
@@ -141,9 +140,9 @@ class _SignupscreenState extends State<Signupscreen> {
                                 if (value!.isEmpty) {
                                   return "Please enter your email";
                                 }
-                                final emailregex = RegExp(
-                                    r'^[a-zA-Z0-9._%+-]+@([\\w-]+\\.)+[\\w-]\$');
-                                if (!emailregex.hasMatch(value)) {
+                                // Corrected the email validation regex
+                                final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+                                if (!emailRegex.hasMatch(value)) {
                                   return "Please enter a valid email";
                                 }
                                 return null;

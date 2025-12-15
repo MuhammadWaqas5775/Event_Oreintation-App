@@ -12,7 +12,7 @@ import 'Profile.dart';
 import 'Mapscreen.dart';
 import 'Settings.dart';
 import 'AboutUs.dart';
-
+import 'ChatScreen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -48,6 +48,8 @@ class MyApp extends StatelessWidget {
             "/Profile": (context) => Profile(),
             "/Settings": (context) => Settings(),
             "/AboutUs": (context) => AboutUs(),
+            "/ChatScreen": (context) =>ChatScreen(),
+
           },
           debugShowCheckedModeBanner: false,
         );

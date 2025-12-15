@@ -10,7 +10,6 @@ import 'package:ueo_app/Loginscreen.dart';
 import 'Memories.dart';
 import 'Mapscreen.dart';
 import 'Profile.dart';
-
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
   @override
@@ -146,6 +145,15 @@ child: ListView(
 ),
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
+        actions: [
+          GestureDetector(
+              onTap: (){
+                Navigator.pushNamed(context,"/ChatScreen");
+              },
+              child: Icon(Icons.chat,color: Colors.black,)),
+          SizedBox(width: 10,),
+
+        ],
       ),
       body: pages[currentindex],
       bottomNavigationBar: Padding(
