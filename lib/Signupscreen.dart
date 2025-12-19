@@ -1,56 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 class Signupscreen extends StatefulWidget {
   const Signupscreen({super.key});
   @override
   State<Signupscreen> createState() => _SignupscreenState();
 }
-
 class _SignupscreenState extends State<Signupscreen> {
   final name = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final confirmpassword = TextEditingController();
-
   final _formkey = GlobalKey<FormState>();
   bool isobscurepassword = true;
   bool isobscureconfirmpassword = true;
-
-  // --- FIX: Updated the signup function to save user data ---
   Future<void> signup() async {
-    // Validate the form first
     if (!_formkey.currentState!.validate()) {
       return;
     }
-
     try {
-      // Step 1: Create the user in Firebase Authentication
       final UserCredential userCredential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email.text.trim(), // Use .trim() to remove extra spaces
+        email: email.text.trim(),
         password: password.text.trim(),
       );
-
       final User? user = userCredential.user;
-
-      // Step 2: If the user was created, save their data to Firestore
       if (user != null) {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': name.text.trim(),
           'email': email.text.trim(),
-          'profileImageUrl': null, // Set image URL to null initially
+          'profileImageUrl': null,
         });
-
-        // Step 3: Navigate to the login page
         if (mounted) {
-          // Use pushNamedAndRemoveUntil to prevent user from going back to signup page
           Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
         }
       }
     } on FirebaseAuthException catch (e) {
-      // Optional: Show a user-friendly error message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -62,23 +47,20 @@ class _SignupscreenState extends State<Signupscreen> {
       print("Firebase Error: \${e.code} → \${e.message}");
     }
   }
-
   @override
   void dispose() {
-    name.dispose(); // Also dispose the name controller
+    name.dispose();
     email.dispose();
     password.dispose();
     confirmpassword.dispose();
     super.dispose();
   }
-
-  // --- NO UI CHANGES BELOW THIS LINE ---
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Stack(
         alignment: Alignment.center,
-        children: [
+        children:[
           Positioned(
             top:0,
             child: Container(
@@ -91,7 +73,6 @@ class _SignupscreenState extends State<Signupscreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              // child: Text("Get Started",style: TextStyle(fontSize: 2,fontWeight: FontWeight.bold,color: Colors.white),)
             ),
           ),
           Positioned(
@@ -114,7 +95,7 @@ class _SignupscreenState extends State<Signupscreen> {
                     key: _formkey,
                     child: Padding(
                       padding: EdgeInsets.all(15.0),
-                      child: SingleChildScrollView( // Added SingleChildScrollView to prevent overflow
+                      child: SingleChildScrollView(
                         child: Column(
                           children: [
                             TextFormField(
@@ -130,7 +111,6 @@ class _SignupscreenState extends State<Signupscreen> {
                                   hintText: "Name",
                                   prefixIcon: Icon(Icons.person),
                                 )),
-                            // Text("@isLogedin"),
                             SizedBox(
                               height: 20,
                             ),
@@ -140,7 +120,6 @@ class _SignupscreenState extends State<Signupscreen> {
                                 if (value!.isEmpty) {
                                   return "Please enter your email";
                                 }
-                                // Corrected the email validation regex
                                 final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
                                 if (!emailRegex.hasMatch(value)) {
                                   return "Please enter a valid email";
@@ -221,7 +200,6 @@ class _SignupscreenState extends State<Signupscreen> {
                                   minimumSize: Size(300, 50),
                                   backgroundColor: Colors.deepOrange[100]),
                               onPressed: () {
-                                // Moved validation check inside the signup function
                                 signup();
                               },
                               child: Text(

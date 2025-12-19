@@ -81,7 +81,7 @@ class _MemoriesState extends State<Memories> {
             stream: _memoriesCollection!.orderBy('timestamp', descending: true).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(child: Text('Something went wrong'));
+                return  Center(child: Text('Something went wrong:${snapshot.error}'));
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {

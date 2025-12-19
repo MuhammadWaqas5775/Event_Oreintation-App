@@ -69,17 +69,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: isMe ? Colors.purple[100] : Colors.grey[300],
                 borderRadius: isMe
                     ? const BorderRadius.only(
-                        topLeft: Radius.circular(15.0),
-                        topRight: Radius.circular(15.0),
-                        bottomLeft: Radius.circular(15.0),
-                        bottomRight: Radius.circular(4.0),
-                      )
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomLeft: Radius.circular(15.0),
+                  bottomRight: Radius.circular(4.0),
+                )
                     : const BorderRadius.only(
-                        topLeft: Radius.circular(15.0),
-                        topRight: Radius.circular(15.0),
-                        bottomLeft: Radius.circular(4.0),
-                        bottomRight: Radius.circular(15.0),
-                      ),
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomLeft: Radius.circular(4.0),
+                  bottomRight: Radius.circular(15.0),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
