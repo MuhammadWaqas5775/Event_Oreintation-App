@@ -13,6 +13,7 @@ import 'Mapscreen.dart';
 import 'Settings.dart';
 import 'AboutUs.dart';
 import 'ChatScreen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -32,24 +33,38 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
+          title: 'UEO App',
           theme: ThemeData(
-            brightness: themeProvider.getIsDarkTheme ? Brightness.dark : Brightness.light,
-            primarySwatch: Colors.purple,
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: themeProvider.getIsDarkTheme ? Brightness.dark : Brightness.light,
+            ),
+            fontFamily: 'Roboto',
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            cardTheme: CardThemeData(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 4,
+            ),
           ),
           initialRoute: "/splash",
           routes: {
-            "/splash": (context) => SplashScreen(),
-            "/": (context) => Loginscreen(),
-            "/Signupscreen": (context) => Signupscreen(),
-            "/MainPage": (context) => MainPage(),
-            "/HomePage": (context) => HomePage(),
-            "/Memories": (context) => Memories(),
-            "/Map": (context) => Mapscreen(),
-            "/Profile": (context) => Profile(),
-            "/Settings": (context) => Settings(),
-            "/AboutUs": (context) => AboutUs(),
-            "/ChatScreen": (context) =>ChatScreen(),
-
+            "/splash": (context) => const SplashScreen(),
+            "/": (context) => const Loginscreen(),
+            "/Signupscreen": (context) => const Signupscreen(),
+            "/MainPage": (context) => const MainPage(),
+            "/HomePage": (context) => const HomePage(),
+            "/Memories": (context) => const Memories(),
+            "/Map": (context) => const Mapscreen(),
+            "/Profile": (context) => const Profile(),
+            "/Settings": (context) => const Settings(),
+            "/AboutUs": (context) => const AboutUs(),
+            "/ChatScreen": (context) => const ChatScreen(),
           },
           debugShowCheckedModeBanner: false,
         );

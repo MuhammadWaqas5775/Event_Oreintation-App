@@ -151,20 +151,21 @@ class ReceiptScreen extends StatelessWidget {
                 const Divider(height: 40),
                 const Text("Keep this receipt for entry proof.", style: TextStyle(fontStyle: FontStyle.italic)),
                 const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
                   children: [
                     ElevatedButton.icon(
                       onPressed: _printReceipt,
                       icon: const Icon(Icons.print),
-                      label: const Text("Print Receipt"),
+                      label: const Text("Print"),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Pop back to the main page (the first route)
                         Navigator.of(context).popUntil((route) => route.isFirst);
                       },
-                      child: const Text("Back to Home"),
+                      child: const Text("Home"),
                     ),
                   ],
                 )
@@ -183,7 +184,8 @@ class ReceiptScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(value),
+          const SizedBox(width: 10),
+          Expanded(child: Text(value, textAlign: TextAlign.right, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
