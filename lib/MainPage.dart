@@ -118,7 +118,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.deepPurple.shade800, Colors.deepPurple.shade400],
+              colors: [Colors.grey.shade800, Colors.grey.shade400],
             ),
           ),
           child: ListView(

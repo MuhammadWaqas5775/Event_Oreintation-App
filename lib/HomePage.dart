@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ueo_app/RegistrationScreen.dart';
+import 'package:ueo_app/notification_service.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Map<String, dynamic>> events = [
     {
+      "id": 1,
       "title": 'Summer Festival 2024',
       "day": "Monday",
       "date": "Oct 25",
@@ -29,6 +32,7 @@ class _HomePageState extends State<HomePage> {
       ],
     },
     {
+      "id": 2,
       "title": 'Tech Innovation Summit',
       "day": "Tuesday",
       "date": "Nov 12",
@@ -47,6 +51,7 @@ class _HomePageState extends State<HomePage> {
       ],
     },
     {
+      "id": 3,
       "title": 'Corporate Networking',
       "day": "Wednesday",
       "date": "Dec 05",
@@ -65,6 +70,36 @@ class _HomePageState extends State<HomePage> {
       ],
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleEventNotifications();
+  }
+
+  void _scheduleEventNotifications() async {
+    for (var event in events) {
+      DateTime? eventDate = _parseDate(event['date']);
+      if (eventDate != null) {
+        await NotificationService().scheduleNotification(
+          event['id'],
+          "Upcoming Event: ${event['title']}",
+          "Your event '${event['title']}' is happening in 3 days!",
+          eventDate,
+        );
+      }
+    }
+  }
+
+  DateTime? _parseDate(String dateStr) {
+    try {
+      // Assuming the year is 2024 as per the titles
+      int year = 2024;
+      return DateFormat("MMM dd yyyy").parse("$dateStr $year");
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +149,7 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(25.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha: 0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -138,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        Colors.black.withOpacity(0.8),
+                                        Colors.black.withValues(alpha: 0.8),
                                       ],
                                     ),
                                   ),
@@ -250,7 +285,7 @@ class _HomePageState extends State<HomePage> {
       width: 100,
       margin: const EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white12),
       ),
@@ -356,13 +391,16 @@ class _HomePageState extends State<HomePage> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Colors.deepPurple.withOpacity(0.1),
+                                      color: Colors.deepPurple.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(subevent['icon'], color: Colors.deepPurple, size: 20),
                                   ),
                                   const SizedBox(width: 15),
-                                  Text(subevent['description'], style: const TextStyle(fontSize: 16)),
+                                  Text(
+                                    subevent['description'],
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                  ),
                                 ],
                               ),
                             );
@@ -372,14 +410,7 @@ class _HomePageState extends State<HomePage> {
                             width: double.infinity,
                             height: 55,
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                elevation: 5,
-                              ),
                               onPressed: () {
-                                Navigator.pop(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -390,7 +421,15 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 );
                               },
-                              child: const Text("Register Now", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                "Register Now",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
