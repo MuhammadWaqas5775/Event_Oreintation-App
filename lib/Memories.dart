@@ -23,7 +23,7 @@ class _MemoriesState extends State<Memories> {
     super.initState();
     cloudinary = CloudinaryPublic('dcfpfknn1', 'ueoapp', cache: false);
     if (user != null) {
-      _memoriesCollection = FirebaseFirestore.instance.collection('users').doc(user!.uid).collection('memories');
+      _memoriesCollection = FirebaseFirestore.instance.collection('memories');
     }
   }
 
@@ -45,6 +45,8 @@ class _MemoriesState extends State<Memories> {
         await _memoriesCollection!.add({
           'imageUrl': response.secureUrl,
           'timestamp': FieldValue.serverTimestamp(),
+          'userId': user!.uid,
+          'userName': user!.displayName ?? ''
         });
       }
     } catch (e) {
@@ -67,7 +69,7 @@ class _MemoriesState extends State<Memories> {
   @override
   Widget build(BuildContext context) {
     if (user == null || _memoriesCollection == null) {
-      return const Center(child: Text("Please log in to see your memories."));
+      return const Center(child: Text("Please log in to see memories."));
     }
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -92,7 +94,7 @@ class _MemoriesState extends State<Memories> {
                   stream: _memoriesCollection!.orderBy('timestamp', descending: true).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return Center(child: Text('Something went wrong:${snapshot.error}', style: const TextStyle(color: Colors.white)));
+                      return Center(child: Text('Something went wrong: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
                     }
 
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -113,6 +115,8 @@ class _MemoriesState extends State<Memories> {
                       itemBuilder: (context, index) {
                         final data = docs[index].data();
                         final imageUrl = data['imageUrl'];
+                        if (imageUrl == null) return const SizedBox.shrink();
+
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -123,6 +127,13 @@ class _MemoriesState extends State<Memories> {
                             );
                           },
                           onLongPress: () async {
+                            if (data['userId'] != user!.uid) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("You can only delete your own memories!")),
+                              );
+                              return;
+                            }
+
                             final bool? shouldDelete = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {
@@ -160,7 +171,7 @@ class _MemoriesState extends State<Memories> {
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
+                                  color: Colors.black.withOpacity(0.2),
                                   blurRadius: 5,
                                   spreadRadius: 1,
                                 ),
@@ -196,20 +207,26 @@ class _MemoriesState extends State<Memories> {
               ),
             ],
           ),
+          Positioned(
+            bottom: 90,
+            right: 20,
+            child: FloatingActionButton(
+              heroTag: "btn2",
+              mini: true,
+              onPressed: _uploadImages,
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add_a_photo),
+            ),
+          ),
           if (_isUploading)
             Container(
-              color: Colors.black.withValues(alpha: 0.5),
+              color: Colors.black.withOpacity(0.5),
               child: const Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
             ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _uploadImages,
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add_a_photo),
       ),
     );
   }

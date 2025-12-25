@@ -28,7 +28,8 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
   intl: ^0.19.0
-
+  flutter_stripe: ^12.1.1
+  dio: ^5.9.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -50,3 +51,9 @@ flutter:
     - assets/background.png
     - assets/splash.png
     - assets/splash.jpeg
+    - assets/sport.jpg
+    - assets/Technology.jpg
+    - assets/workshops.jpg
+    - assets/food.jpg
+    - assets/bussiness.jpg
+    - assets/music.jpg

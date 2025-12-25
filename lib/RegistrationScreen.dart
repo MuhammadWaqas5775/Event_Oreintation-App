@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:ueo_app/services/stripe_services.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String eventTitle;
@@ -17,19 +18,99 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
+  void _showPaymentSummary() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Registration Summary"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Event: ${widget.eventTitle}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text("Name: ${_nameController.text}"),
+            Text("Email: ${_emailController.text}"),
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Total Price:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text("Rs ${widget.price}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Edit Details"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // 1. Get the Navigator using the screen's context before the dialog closes
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              // 2. Close the Summary Dialog
+              navigator.pop();
+              
+              // 3. Show loading indicator using the screen's context
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (loadingContext) => const Center(child: CircularProgressIndicator()),
+              );
+
+              try {
+                // Sanitize price
+                String numericPrice = widget.price.replaceAll(RegExp(r'[^0-9]'), '');
+                int amount = int.tryParse(numericPrice) ?? 0;
+                
+                // 4. Trigger Stripe Payment
+                bool success = await StripeServices.instance.makePayment(amount, "pkr");
+
+                // 5. Close loading indicator (pops the top-most route, which is the loader)
+                if (mounted) {
+                   navigator.pop();
+                }
+
+                if (success) {
+                  if (mounted) {
+                    navigator.push(
+                      MaterialPageRoute(
+                        builder: (context) => ReceiptScreen(
+                          name: _nameController.text,
+                          email: _emailController.text,
+                          eventTitle: widget.eventTitle,
+                          price: widget.price,
+                        ),
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(content: Text("Payment failed or cancelled.")),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) navigator.pop(); // Close loader on error
+                print("Error during payment: $e");
+              }
+            },
+            child: const Text("Pay & Register"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ReceiptScreen(
-            name: _nameController.text,
-            email: _emailController.text,
-            eventTitle: widget.eventTitle,
-            price: widget.price,
-          ),
-        ),
-      );
+      _showPaymentSummary();
     }
   }
 
@@ -163,7 +244,7 @@ class ReceiptScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        Navigator.pushNamedAndRemoveUntil(context, '/MainPage', (route) => false);
                       },
                       child: const Text("Home"),
                     ),

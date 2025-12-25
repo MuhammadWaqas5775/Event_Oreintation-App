@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:ueo_app/SplashScreen.dart';
 import 'package:ueo_app/theme_provider.dart';
 import 'package:ueo_app/notification_service.dart';
+import 'package:ueo_app/const.dart';
 import 'Loginscreen.dart';
 import 'Signupscreen.dart';
 import 'HomePage.dart';
@@ -17,6 +19,11 @@ import 'ChatScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Stripe
+  Stripe.publishableKey = stripePublishablekey;
+  await Stripe.instance.applySettings();
+
   await Firebase.initializeApp();
   
   // Initialize Notification Service

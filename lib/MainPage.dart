@@ -13,36 +13,38 @@ import 'Profile.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-  File? _image;
+class _MainPageState extends State<MainPage> {
+  // Navigation State
+  int currentIndex = 0;
+  late CircularBottomNavigationController _navController;
+
+  // User & Profile State
+  final User? user = FirebaseAuth.instance.currentUser;
   String? _imageUrl;
   late final CloudinaryPublic cloudinary;
-  final User? user = FirebaseAuth.instance.currentUser;
   late final DocumentReference<Map<String, dynamic>> _userDoc;
 
-  int currentindex = 0;
-  late CircularBottomNavigationController _navigationController;
-
-  List<TabItem> tabItems = List.of([
-    TabItem(Icons.calendar_month, "Schedule", Colors.deepPurple,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-    TabItem(Icons.image, "Memories", Colors.deepPurple,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-    TabItem(Icons.location_on, "Location", Colors.deepPurple,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-    TabItem(Icons.person, "Profile", Colors.deepPurple,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-  ]);
-
+  // Tab items for bottom navigation
+  final List<TabItem> tabItems = [
+    TabItem(Icons.calendar_month, "Schedule", Colors.deepPurple),
+    TabItem(Icons.image, "Memories", Colors.deepPurple),
+    TabItem(Icons.location_on, "Location", Colors.deepPurple),
+    TabItem(Icons.person, "Profile", Colors.deepPurple),
+  ];
+  Future<void> _chat()async{
+    Navigator.pushNamed(context, "/ChatScreen");
+  }
   @override
   void initState() {
     super.initState();
-    _navigationController = CircularBottomNavigationController(currentindex);
+    _navController = CircularBottomNavigationController(currentIndex);
     cloudinary = CloudinaryPublic('dcfpfknn1', 'ueoapp', cache: false);
+
     if (user != null) {
       _userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
       _loadProfileImage();
@@ -51,105 +53,80 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
-    _navigationController.dispose();
+    _navController.dispose();
     super.dispose();
   }
 
+  // --- Profile Logic ---
+
   Future<void> _loadProfileImage() async {
-    try {
-      final snapshot = await _userDoc.get();
-      if (snapshot.exists) {
-        setState(() {
-          _imageUrl = snapshot.data()?['profileImageUrl'];
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load profile image: $e')),
-      );
+    final snapshot = await _userDoc.get();
+    if (snapshot.exists && mounted) {
+      setState(() {
+        _imageUrl = snapshot.data()?['profileImageUrl'];
+      });
     }
   }
 
-  Future<void> _pickImage() async {
-    if (user == null) return;
+  Future<void> _pickAndUploadImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-      _uploadToCloudinary();
+    if (pickedFile != null && user != null) {
+      try {
+        final response = await cloudinary.uploadFile(
+          CloudinaryFile.fromFile(pickedFile.path, resourceType: CloudinaryResourceType.Image),
+        );
+        await _userDoc.set({'profileImageUrl': response.secureUrl}, SetOptions(merge: true));
+        if (mounted) {
+          setState(() {
+            _imageUrl = response.secureUrl;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+        }
+      }
     }
   }
 
-  Future<void> _uploadToCloudinary() async {
-    if (_image == null || user == null) return;
-    try {
-      final response = await cloudinary.uploadFile(
-        CloudinaryFile.fromFile(_image!.path, resourceType: CloudinaryResourceType.Image),
-      );
-      final imageUrl = response.secureUrl;
-      await _userDoc.set({'profileImageUrl': imageUrl}, SetOptions(merge: true));
-      setState(() {
-        _imageUrl = imageUrl;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image: $e')),
-      );
-    }
-  }
+  // --- UI Components ---
 
-  List pages = [
-    const HomePage(key: ValueKey(0)),
-    const Memories(key: ValueKey(1)),
-    const Mapscreen(key: ValueKey(2)),
-    const Profile(key: ValueKey(3)),
+  List<Widget> get _pages => [
+    const HomePage(),
+    const Memories(),
+    const Mapscreen(),
+    const Profile(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      drawer: Drawer(
+      drawer:Drawer(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.grey.shade800, Colors.grey.shade400],
-            ),
-          ),
+          color: Colors.grey[600],
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
               UserAccountsDrawerHeader(
                 decoration: const BoxDecoration(color: Colors.transparent),
                 currentAccountPicture: GestureDetector(
-                  onTap: _pickImage,
-                  child: Hero(
-                    tag: 'profile_pic',
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white24,
-                      backgroundImage: _imageUrl != null ? NetworkImage(_imageUrl!) : null,
-                      child: _imageUrl == null && _image == null
-                          ? const Icon(Icons.camera_alt, color: Colors.white70)
-                          : null,
-                    ),
+                  onTap: _pickAndUploadImage,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white24,
+                    backgroundImage: _imageUrl != null ? NetworkImage(_imageUrl!) : null,
+                    child: _imageUrl == null ? const Icon(Icons.camera_alt, color: Colors.white) : null,
                   ),
                 ),
-                accountName: Text(user?.displayName ?? "User Name", 
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                accountName: Text(user?.displayName ?? "User"),
                 accountEmail: Text(user?.email ?? "user@example.com"),
               ),
-              _buildDrawerItem(Icons.home, "Home", () => Navigator.pop(context)),
-              _buildDrawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
-              _buildDrawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
-              _buildDrawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
-              const Divider(color: Colors.white24),
-              _buildDrawerItem(Icons.logout, "Logout", () {
+              _drawerItem(Icons.home, "Home", () => Navigator.pop(context)),
+              _drawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
+              _drawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
+              _drawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
+               Divider(color: Colors.white24),
+              _drawerItem(Icons.logout, "Logout", () {
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
               }),
             ],
@@ -157,83 +134,63 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         ),
       ),
       appBar: AppBar(
-        title: const Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title:  Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () => Navigator.pushNamed(context, "/ChatScreen"),
-          ),
-          const SizedBox(width: 8),
-        ],
+
       ),
       body: Stack(
         children: [
+          // Background Image
           Positioned.fill(
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 1.0, end: 1.1),
-              duration: const Duration(seconds: 30),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: Image.asset(
-                    "assets/background.png",
-                    fit: BoxFit.cover,
-                  ),
-                );
-              },
-            ),
+            child: Image.asset("assets/background.png", fit: BoxFit.cover),
           ),
+          // Dark Overlay
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.3),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.4)),
           ),
+          // Content
           SafeArea(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 600),
-              switchInCurve: Curves.easeOutQuart,
-              switchOutCurve: Curves.easeInQuart,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.0, 0.1),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-              child: pages[currentindex],
+            child: IndexedStack(
+              index: currentIndex,
+              children: _pages,
             ),
           ),
         ],
       ),
       bottomNavigationBar: CircularBottomNavigation(
         tabItems,
-        controller: _navigationController,
+        controller: _navController,
         barHeight: 60,
         circleSize: 50,
         selectedCallback: (int? selectedPos) {
           setState(() {
-            currentindex = selectedPos ?? 0;
+            currentIndex = selectedPos ?? 0;
           });
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: "btn1",
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+          onPressed:_chat,
+          child:Icon(Icons.chat, color: Colors.white
+          ),
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+
+        ),
+
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+
+
+  Widget _drawerItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
       onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
     );
   }
 }
