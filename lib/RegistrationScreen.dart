@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -17,6 +19,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+
+  Future<void> _saveRegistrationToFirestore() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      await FirebaseFirestore.instance.collection('registrations').add({
+        'userId': user?.uid,
+        'name': _nameController.text,
+        'email': _emailController.text,
+        'eventTitle': widget.eventTitle,
+        'price': widget.price,
+        'registrationDate': FieldValue.serverTimestamp(),
+        'paymentStatus': 'success',
+      });
+      print("Registration saved to Firestore");
+    } catch (e) {
+      print("Error saving registration: $e");
+    }
+  }
 
   void _showPaymentSummary() {
     showDialog(
@@ -49,14 +69,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // 1. Get the Navigator using the screen's context before the dialog closes
               final navigator = Navigator.of(context);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-              // 2. Close the Summary Dialog
               navigator.pop();
               
-              // 3. Show loading indicator using the screen's context
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -64,19 +81,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               );
 
               try {
-                // Sanitize price
                 String numericPrice = widget.price.replaceAll(RegExp(r'[^0-9]'), '');
                 int amount = int.tryParse(numericPrice) ?? 0;
                 
-                // 4. Trigger Stripe Payment
                 bool success = await StripeServices.instance.makePayment(amount, "pkr");
 
-                // 5. Close loading indicator (pops the top-most route, which is the loader)
                 if (mounted) {
                    navigator.pop();
                 }
 
                 if (success) {
+                  // SAVE TO FIREBASE HERE
+                  await _saveRegistrationToFirestore();
+
                   if (mounted) {
                     navigator.push(
                       MaterialPageRoute(
@@ -97,7 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   }
                 }
               } catch (e) {
-                if (mounted) navigator.pop(); // Close loader on error
+                if (mounted && Navigator.canPop(context)) navigator.pop();
                 print("Error during payment: $e");
               }
             },

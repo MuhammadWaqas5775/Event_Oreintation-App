@@ -25,11 +25,13 @@ dependencies:
   printing: ^5.13.6
   carousel_slider: ^5.1.1
   circular_bottom_navigation: ^2.4.0
-  flutter_local_notifications: ^18.0.1
-  timezone: ^0.10.0
   intl: ^0.19.0
   flutter_stripe: ^12.1.1
   dio: ^5.9.0
+  flutter_local_notifications: ^17.2.2
+  firebase_messaging: ^16.1.0
+  timezone: ^0.9.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -40,7 +42,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/b.jpg"
+  image_path: "assets/splash.jpeg"
 
 flutter:
   uses-material-design: true
@@ -55,5 +57,5 @@ flutter:
     - assets/Technology.jpg
     - assets/workshops.jpg
     - assets/food.jpg
-    - assets/bussiness.jpg
     - assets/music.jpg
+    - assets/bussiness.jpg

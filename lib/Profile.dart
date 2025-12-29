@@ -113,6 +113,135 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  // Implementation of Reset Password
+  Future<void> _handlePasswordReset() async {
+    if (user?.email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No email found for this user.")),
+      );
+      return;
+    }
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Reset email sent to ${user!.email}")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
+  }
+
+  void _showSecurityDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text("Security Settings", style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.lock_reset, color: Colors.white70),
+              title: const Text("Reset Password", style: TextStyle(color: Colors.white)),
+              subtitle: const Text("Receive reset link via email", style: TextStyle(color: Colors.white54, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(context);
+                _handlePasswordReset();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever, color: Colors.redAccent),
+              title: const Text("Delete Account", style: TextStyle(color: Colors.redAccent)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteConfirmation();
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text("Delete Account?", style: TextStyle(color: Colors.white)),
+        content: const Text(
+          "This action is permanent and cannot be undone.",
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () async {
+              try {
+                await user?.delete();
+                if (mounted) {
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please re-login to delete your account.")),
+                  );
+                  Navigator.pop(context);
+                }
+              }
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpSupportDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text("Help & Support", style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.email, color: Colors.white70),
+              title: const Text("Contact Support", style: TextStyle(color: Colors.white)),
+              subtitle: const Text("support@ueoapp.com", style: TextStyle(color: Colors.white54)),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Inquiry sent to support team.")),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline, color: Colors.white70),
+              title: const Text("App Version", style: TextStyle(color: Colors.white)),
+              subtitle: const Text("1.0.0", style: TextStyle(color: Colors.white54)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (user == null) {
@@ -206,9 +335,9 @@ class _ProfileState extends State<Profile> {
                         const Divider(color: Colors.white12, height: 1),
                         _buildProfileOption(Icons.notifications_none, "Notifications", () {}),
                         const Divider(color: Colors.white12, height: 1),
-                        _buildProfileOption(Icons.security, "Security", () {}),
+                        _buildProfileOption(Icons.security, "Security", _showSecurityDialog),
                         const Divider(color: Colors.white12, height: 1),
-                        _buildProfileOption(Icons.help_outline, "Help & Support", () {}),
+                        _buildProfileOption(Icons.help_outline, "Help & Support", _showHelpSupportDialog),
                       ],
                     ),
                   ),

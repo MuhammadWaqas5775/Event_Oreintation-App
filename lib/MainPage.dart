@@ -121,11 +121,14 @@ class _MainPageState extends State<MainPage> {
                 accountName: Text(user?.displayName ?? "User"),
                 accountEmail: Text(user?.email ?? "user@example.com"),
               ),
-              _drawerItem(Icons.home, "Home", () => Navigator.pop(context)),
+              _drawerItem(Icons.home, "Home", () => Navigator.pushNamed(context,"/MainPage")),
               _drawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
               _drawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
               _drawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
-               Divider(color: Colors.white24),
+              const Divider(color: Colors.white24),
+              // --- Admin Portal Entry ---
+              _drawerItem(Icons.admin_panel_settings, "Admin Portal", () => Navigator.pushNamed(context, "/AdminLogin")),
+              const Divider(color: Colors.white24),
               _drawerItem(Icons.logout, "Logout", () {
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
               }),
@@ -134,22 +137,14 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
       appBar: AppBar(
-        title:  Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title:  const Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-
       ),
       body: Stack(
         children: [
-          // Background Image
-          Positioned.fill(
-            child: Image.asset("assets/background.png", fit: BoxFit.cover),
-          ),
-          // Dark Overlay
-          Positioned.fill(
-            child: Container(color: Colors.black.withValues(alpha: 0.4)),
-          ),
-          // Content
+          Positioned.fill(child: Image.asset("assets/background.png", fit: BoxFit.cover)),
+          Positioned.fill(child: Container(color: Colors.black.withValues(alpha: 0.4))),
           SafeArea(
             child: IndexedStack(
               index: currentIndex,
@@ -163,6 +158,7 @@ class _MainPageState extends State<MainPage> {
         controller: _navController,
         barHeight: 60,
         circleSize: 50,
+        iconsSize: 20,
         selectedCallback: (int? selectedPos) {
           setState(() {
             currentIndex = selectedPos ?? 0;
@@ -174,17 +170,12 @@ class _MainPageState extends State<MainPage> {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
           onPressed:_chat,
-          child:Icon(Icons.chat, color: Colors.white
-          ),
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
-
+          child:const Icon(Icons.chat, color: Colors.white),
         ),
-
     );
   }
-
-
 
   Widget _drawerItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(

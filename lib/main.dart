@@ -2,10 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:ueo_app/AdminPage.dart';
 import 'package:ueo_app/SplashScreen.dart';
 import 'package:ueo_app/theme_provider.dart';
-import 'package:ueo_app/notification_service.dart';
 import 'package:ueo_app/const.dart';
+import 'package:ueo_app/notification_service.dart';
 import 'Loginscreen.dart';
 import 'Signupscreen.dart';
 import 'HomePage.dart';
@@ -24,9 +25,10 @@ void main() async {
   Stripe.publishableKey = stripePublishablekey;
   await Stripe.instance.applySettings();
 
+  // Initialize Firebase
   await Firebase.initializeApp();
-  
-  // Initialize Notification Service
+
+  // Initialize Notifications
   await NotificationService().init();
   
   runApp(
@@ -77,6 +79,7 @@ class MyApp extends StatelessWidget {
             "/Settings": (context) => const Settings(),
             "/AboutUs": (context) => const AboutUs(),
             "/ChatScreen": (context) => const ChatScreen(),
+            "/AdminPage": (context) => const AdminPage(),
           },
           debugShowCheckedModeBanner: false,
         );
