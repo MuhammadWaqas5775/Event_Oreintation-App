@@ -22,7 +22,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Stripe
-  Stripe.publishableKey = stripePublishablekey;
+  Stripe.publishableKey = dotenv.env['stripePublishablekey']!;
   await Stripe.instance.applySettings();
 
   // Initialize Firebase
