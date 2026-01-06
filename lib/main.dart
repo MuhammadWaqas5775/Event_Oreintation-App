@@ -17,18 +17,27 @@ import 'Mapscreen.dart';
 import 'Settings.dart';
 import 'AboutUs.dart';
 import 'ChatScreen.dart';
+import 'NotificationTestPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Stripe
-  Stripe.publishableKey = dotenv.env['stripePublishablekey']!;
+  // 1. Load Environment Variables
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("Error loading .env file: $e");
+  }
+
+  // 2. Initialize Stripe
+  // Fallback to empty string if key is missing to avoid crash
+  Stripe.publishableKey = dotenv.env['stripePublishablekey'] ?? "";
   await Stripe.instance.applySettings();
 
-  // Initialize Firebase
+  // 3. Initialize Firebase
   await Firebase.initializeApp();
 
-  // Initialize Notifications
+  // 4. Initialize Notifications
   await NotificationService().init();
   
   runApp(
@@ -80,6 +89,7 @@ class MyApp extends StatelessWidget {
             "/AboutUs": (context) => const AboutUs(),
             "/ChatScreen": (context) => const ChatScreen(),
             "/AdminPage": (context) => const AdminPage(),
+            "/NotificationTest": (context) => const NotificationTestPage(),
           },
           debugShowCheckedModeBanner: false,
         );

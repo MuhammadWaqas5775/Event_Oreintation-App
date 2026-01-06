@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:ueo_app/const.dart';
 
 class StripeServices {
   StripeServices._();
@@ -50,6 +50,13 @@ class StripeServices {
   Future<String?> _createPaymentIntent(int amount, String currency) async {
     try {
       final Dio dio = Dio();
+      final String? secretKey = dotenv.env['stripeSecretKey'];
+      
+      if (secretKey == null) {
+        print("Error: stripeSecretKey not found in .env");
+        return null;
+      }
+
       Map<String, dynamic> data = {
         'amount': _calculateAmount(amount),
         'currency': currency,
@@ -61,7 +68,7 @@ class StripeServices {
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
           headers: {
-            "Authorization": "Bearer $stripeSecretkey",
+            "Authorization": "Bearer $secretKey",
             "Content-Type": "application/x-www-form-urlencoded",
           },
         ),

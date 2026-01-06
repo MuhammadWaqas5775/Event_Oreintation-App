@@ -32,6 +32,13 @@ class Settings extends StatelessWidget {
             },
           ),
           ListTile(
+            title: const Text('Test Notifications'),
+            leading: const Icon(Icons.notifications_active),
+            onTap: () {
+              Navigator.pushNamed(context, '/NotificationTest');
+            },
+          ),
+          ListTile(
             title: const Text('Logout'),
             leading: const Icon(Icons.logout),
             onTap: () async {

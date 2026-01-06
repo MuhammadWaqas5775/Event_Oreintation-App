@@ -125,9 +125,7 @@ class _MainPageState extends State<MainPage> {
               _drawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
               _drawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
               _drawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
-              const Divider(color: Colors.white24),
-              // --- Admin Portal Entry ---
-              _drawerItem(Icons.admin_panel_settings, "Admin Portal", () => Navigator.pushNamed(context, "/AdminLogin")),
+
               const Divider(color: Colors.white24),
               _drawerItem(Icons.logout, "Logout", () {
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
@@ -153,6 +151,8 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
+      extendBody: true,
+
       bottomNavigationBar: CircularBottomNavigation(
         tabItems,
         controller: _navController,

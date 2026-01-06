@@ -14,13 +14,42 @@ class _LoginscreenState extends State<Loginscreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   
-  bool _rememberMe = false;
+  bool _rememberMe =false;
   bool _isObscure = true;
   bool _isLoading = false;
 
   // Hardcoded Admin Credentials
   final String _adminEmail = "admin@ueo.com";
   final String _adminPassword = "adminpassword123";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  // Load saved email and checkbox state
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = prefs.getBool("remember") ?? false;
+      if (_rememberMe) {
+        _emailController.text = prefs.getString("email") ?? "";
+      }
+    });
+  }
+
+  // Save or clear credentials
+  Future<void> _handleRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setBool("remember", true);
+      await prefs.setString("email", _emailController.text.trim());
+    } else {
+      await prefs.remove("remember");
+      await prefs.remove("email");
+    }
+  }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -33,14 +62,13 @@ class _LoginscreenState extends State<Loginscreen> {
     // 🛡️ Check if it's the Admin
     if (email == _adminEmail && password == _adminPassword) {
       try {
-        // Sign in to Firebase Auth as well to satisfy security rules
         await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+        await _handleRememberMe();
         if (mounted) {
           Navigator.pushReplacementNamed(context, "/AdminPage");
         }
         return;
       } catch (e) {
-        // If Firebase login fails (user not created yet), still allow Admin entry or show error
         print("Admin Firebase Login Error: $e");
       }
     }
@@ -52,11 +80,7 @@ class _LoginscreenState extends State<Loginscreen> {
         password: password,
       );
       
-      if (_rememberMe) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool("remember", true);
-        await prefs.setString("email", email);
-      }
+      await _handleRememberMe();
       
       if (mounted) {
         Navigator.pushReplacementNamed(context, "/MainPage");
@@ -121,7 +145,11 @@ class _LoginscreenState extends State<Loginscreen> {
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                Checkbox(value: _rememberMe, onChanged: (v) => setState(() => _rememberMe = v!)),
+                                Checkbox(
+                                  value: _rememberMe, 
+                                  activeColor: Colors.deepPurple,
+                                  onChanged: (v) => setState(() => _rememberMe = v!),
+                                ),
                                 const Text("Remember me"),
                               ],
                             ),
