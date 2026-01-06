@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:ueo_app/const.dart';
 
 class StripeServices {
   StripeServices._();
@@ -61,7 +61,7 @@ class StripeServices {
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
           headers: {
-            "Authorization": "Bearer $stripeSecretkey",
+            "Authorization": "Bearer ${dotenv.env['STRIPE_SECRETKEY']}",
             "Content-Type": "application/x-www-form-urlencoded",
           },
         ),
