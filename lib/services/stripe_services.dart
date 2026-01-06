@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:ueo_app/const.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class StripeServices {
   StripeServices._();
@@ -55,13 +55,21 @@ class StripeServices {
         'currency': currency,
       };
 
+      // Retrieve secret key from dotenv
+      String? stripeSecretKey = dotenv.env['stripeSecretkey'];
+
+      if (stripeSecretKey == null || stripeSecretKey.isEmpty) {
+        print("Error: stripeSecretkey not found in .env file");
+        return null;
+      }
+
       var response = await dio.post(
         "https://api.stripe.com/v1/payment_intents",
         data: data,
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
           headers: {
-            "Authorization": "Bearer $stripeSecretkey",
+            "Authorization": "Bearer $stripeSecretKey",
             "Content-Type": "application/x-www-form-urlencoded",
           },
         ),

@@ -9,15 +9,17 @@ class NotificationService {
   NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _notifications =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   /// 🔔 ANDROID CHANNEL (REQUIRED)
   static const AndroidNotificationChannel _eventChannel =
-  AndroidNotificationChannel(
+      AndroidNotificationChannel(
     'event_channel_id',
     'Event Notifications',
     description: 'Notifications for upcoming events',
     importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
   );
 
   Future<void> init() async {
@@ -26,23 +28,38 @@ class NotificationService {
     // ✅ Correct timezone setup
     tz.initializeTimeZones();
 
-    const androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    // Reverting to the @mipmap prefix which is required for resources in mipmap folders
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const settings = InitializationSettings(android: androidSettings);
 
-    await _notifications.initialize(
-      settings,
-      onDidReceiveNotificationResponse: (details) {
-        print("Notification tapped: ${details.payload}");
-      },
-    );
+    try {
+      await _notifications.initialize(
+        settings,
+        onDidReceiveNotificationResponse: (details) {
+          print("Notification tapped: ${details.payload}");
+        },
+      );
+    } catch (e) {
+      print("Error during Notification initialization: $e");
+      // Fallback to a generic launcher icon name if ic_launcher fails
+      try {
+        await _notifications.initialize(
+          const InitializationSettings(android: AndroidInitializationSettings('@mipmap/launcher_icon')),
+          onDidReceiveNotificationResponse: (details) {
+            print("Notification tapped: ${details.payload}");
+          },
+        );
+      } catch (e2) {
+        print("Final fallback failed: $e2");
+      }
+    }
 
     // ✅ CREATE CHANNEL + REQUEST PERMISSION
     if (Platform.isAndroid) {
-      final androidPlugin =
-      _notifications.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidPlugin != null) {
         await androidPlugin.createNotificationChannel(_eventChannel);
@@ -51,6 +68,39 @@ class NotificationService {
     }
 
     print("NotificationService Initialized.");
+  }
+
+  /// ✅ Check if exact alarm permission is granted
+  Future<bool> canScheduleExactAlarms() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        try {
+          return await (androidPlugin as dynamic).canScheduleExactAlarms() ?? true;
+        } catch (e) {
+          return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  /// ✅ Request exact alarm permission
+  Future<void> requestExactAlarmPermission() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        try {
+          await (androidPlugin as dynamic).requestExactAlarmPermission();
+        } catch (e) {
+          print("Could not request exact alarm permission: $e");
+        }
+      }
+    }
   }
 
   /// ✅ INSTANT TEST (MUST WORK)
@@ -65,22 +115,23 @@ class NotificationService {
           'Event Notifications',
           importance: Importance.max,
           priority: Priority.high,
+          // Removed explicit icon to use the default initialized icon
         ),
       ),
     );
   }
 
-  /// ✅ 10-SECOND TEST NOTIFICATION
+  /// ✅ 10-SECOND TEST NOTIFICATION (EXACT)
   Future<void> scheduleTestNotification() async {
     final scheduledTime =
-    tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
+        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
 
-    print("Scheduling test notification for $scheduledTime");
+    print("Scheduling EXACT test notification for $scheduledTime");
 
     await _notifications.zonedSchedule(
       2,
       'Scheduled Test',
-      'This should appear in 10 seconds',
+      'This should appear in exactly 10 seconds',
       scheduledTime,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -88,11 +139,12 @@ class NotificationService {
           'Event Notifications',
           importance: Importance.max,
           priority: Priority.high,
+          // Removed explicit icon to use the default initialized icon
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -119,11 +171,12 @@ class NotificationService {
           'Event Notifications',
           importance: Importance.max,
           priority: Priority.high,
+          // Removed explicit icon to use the default initialized icon
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
 
     print("Scheduled: $title");
