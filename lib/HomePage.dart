@@ -18,7 +18,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Auto-test notification removed - use NotificationTestPage for testing
+    Future.delayed(const Duration(seconds: 2), () {
+      NotificationService().showInstantNotification();
+    });
   }
 
   void _scheduleNotificationsForEvents(List<Map<String, dynamic>> events) {
@@ -106,7 +108,6 @@ class _HomePageState extends State<HomePage> {
                   enlargeCenterPage: true,
                   autoPlay: filteredEvents.length > 1,
                   viewportFraction: 0.85,
-                  enableInfiniteScroll: filteredEvents.length > 1
                 ),
                 items: filteredEvents.map((event) {
                   return Builder(
