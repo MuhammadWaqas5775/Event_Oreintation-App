@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ueo_app/RegistrationScreen.dart';
-import 'package:intl/intl.dart';
 import 'package:ueo_app/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -14,45 +13,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedCategory = "All";
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _notificationsScheduled = false; // Flag to ensure scheduling happens only once
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    // You can keep this for testing or remove it.
+    Future.delayed(const Duration(seconds: 3), () {
       NotificationService().showInstantNotification();
     });
   }
 
-  void _scheduleNotificationsForEvents(List<Map<String, dynamic>> events) {
-    for (var event in events) {
-      DateTime? eventDate = _parseDate(event['date']);
-      if (eventDate != null) {
-        DateTime fireDate = eventDate.subtract(const Duration(days: 2));
-        NotificationService().scheduleEventNotification(
-          id: event['id'].hashCode,
-          title: event['title'],
-          body: "Don't forget! The ${event['title']} is starting in 2 days.",
-          scheduleDate: fireDate,
-        );
-      }
-    }
-  }
-
-  DateTime? _parseDate(String dateStr) {
-    try {
-      final now = DateTime.now();
-      final currentYear = now.year;
-      DateTime parsed = DateFormat("MMM dd yyyy").parse("$dateStr $currentYear");
-      if (parsed.isBefore(now)) {
-        parsed = DateTime(currentYear + 1, parsed.month, parsed.day);
-      }
-      return parsed;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // Improved Category Icon Logic
   IconData _getCategoryIcon(String category) {
     String cat = category.toLowerCase().trim();
     if (cat.contains("music") || cat.contains("art")) return Icons.music_note;
@@ -62,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     if (cat.contains("food") || cat.contains("cook")) return Icons.fastfood;
     if (cat.contains("workshop") || cat.contains("learn")) return Icons.architecture;
     if (cat == "all") return Icons.grid_view;
-    return Icons.star_border; // Fallback icon for new categories
+    return Icons.star_border;
   }
 
   @override
@@ -70,8 +41,15 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('events').snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-        if (snapshot.hasError) return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.white)));
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.white)));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text("No events available", style: TextStyle(color: Colors.white70)));
+        }
 
         final List<Map<String, dynamic>> events = snapshot.data!.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
@@ -79,9 +57,13 @@ class _HomePageState extends State<HomePage> {
           return data;
         }).toList();
 
-        if (events.isEmpty) return const Center(child: Text("No events available", style: TextStyle(color: Colors.white70)));
-
-        _scheduleNotificationsForEvents(events);
+        // ✅ SCHEDULE ONCE: Check the flag and schedule notifications only on the first valid data load.
+        if (!_notificationsScheduled && events.isNotEmpty) {
+          print("Data loaded, scheduling all event reminders...");
+          NotificationService().scheduleAllEventReminders(events);
+          // Set flag to true to prevent re-scheduling on subsequent builds
+          _notificationsScheduled = true;
+        }
 
         final categories = ["All", ...events.map((e) => e['category'] as String).toSet()];
         final filteredEvents = selectedCategory == "All"
@@ -112,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                 items: filteredEvents.map((event) {
                   return Builder(
                     builder: (BuildContext context) {
-                      String imgUrl = event['detail'][0]['imgurl'];
+                      String imgUrl = event['detail'][0]['imgurl'] ?? '';
                       return GestureDetector(
                         onTap: () => _showEventDetails(context, event),
                         child: Container(
@@ -125,9 +107,9 @@ class _HomePageState extends State<HomePage> {
                             child: Stack(
                               children: [
                                 Positioned.fill(
-                                  child: imgUrl.startsWith('http') 
+                                  child: imgUrl.startsWith('http')
                                     ? Image.network(imgUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
-                                    : Image.asset(imgUrl, fit: BoxFit.cover),
+                                    : Image.asset("assets/background.png", fit: BoxFit.cover), // Fallback asset
                                 ),
                                 Positioned.fill(child: Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.8)])))),
                                 Positioned(
@@ -135,17 +117,17 @@ class _HomePageState extends State<HomePage> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.deepPurple, borderRadius: BorderRadius.circular(8)), child: Text(event['category'], style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
+                                      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.deepPurple, borderRadius: BorderRadius.circular(8)), child: Text(event['category'] ?? 'General', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
                                       const SizedBox(height: 8),
-                                      Text(event['title'], style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                                      Text(event['title'] ?? 'Untitled Event', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
                                           const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
                                           const SizedBox(width: 5),
-                                          Text("${event['day']}, ${event['date']}", style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                          Text("${event['day'] ?? ''}, ${event['date'] ?? ''}", style: const TextStyle(color: Colors.white70, fontSize: 14)),
                                           const Spacer(),
-                                          Text("Rs ${event['price']}", style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold)),
+                                          Text("Rs ${event['price'] ?? '0'}", style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold)),
                                         ],
                                       ),
                                     ],
@@ -229,7 +211,7 @@ class _HomePageState extends State<HomePage> {
           minChildSize: 0.5,
           maxChildSize: 0.95,
           builder: (_, scrollController) {
-            String imgUrl = event['detail'][0]['imgurl'];
+            String imgUrl = event['detail'][0]['imgurl'] ?? '';
             return Container(
               decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
               child: SingleChildScrollView(
@@ -243,7 +225,7 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                           child: imgUrl.startsWith('http')
                             ? Image.network(imgUrl, height: 250, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image))
-                            : Image.asset(imgUrl, height: 250, width: double.infinity, fit: BoxFit.cover),
+                            : Image.asset("assets/background.png", height: 250, width: double.infinity, fit: BoxFit.cover),
                         ),
                         Positioned(top: 15, right: 20, child: CircleAvatar(backgroundColor: Colors.black26, child: IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.pop(context)))),
                       ],
@@ -256,16 +238,16 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(child: Text(event['title'], style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold))),
-                              Text("Rs ${event['price']}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                              Expanded(child: Text(event['title'] ?? 'Untitled Event', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold))),
+                              Text("Rs ${event['price'] ?? '0'}", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(children: [const Icon(Icons.calendar_month, color: Colors.grey, size: 18), const SizedBox(width: 8), Text("${event['day']}, ${event['date']}", style: const TextStyle(color: Colors.grey, fontSize: 16))]),
+                          Row(children: [const Icon(Icons.calendar_month, color: Colors.grey, size: 18), const SizedBox(width: 8), Text("${event['day'] ?? ''}, ${event['date'] ?? ''}", style: const TextStyle(color: Colors.grey, fontSize: 16))]),
                           const Divider(height: 40),
                           const Text("Description", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
-                          Text(event['detail'][0]['description'], style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.5)),
+                          Text(event['detail'][0]['description'] ?? 'No description available.', style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.5)),
                           const SizedBox(height: 30),
                           const Text("Highlights", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 15),
