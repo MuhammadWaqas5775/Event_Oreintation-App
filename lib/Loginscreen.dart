@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Loginscreen extends StatefulWidget {
@@ -14,11 +15,10 @@ class _LoginscreenState extends State<Loginscreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   
-  bool _rememberMe =false;
+  bool _rememberMe = false;
   bool _isObscure = true;
   bool _isLoading = false;
 
-  // Hardcoded Admin Credentials
   final String _adminEmail = "admin@ueo.com";
   final String _adminPassword = "adminpassword123";
 
@@ -28,7 +28,6 @@ class _LoginscreenState extends State<Loginscreen> {
     _loadSavedCredentials();
   }
 
-  // Load saved email and checkbox state
   Future<void> _loadSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -39,7 +38,6 @@ class _LoginscreenState extends State<Loginscreen> {
     });
   }
 
-  // Save or clear credentials
   Future<void> _handleRememberMe() async {
     final prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
@@ -59,7 +57,6 @@ class _LoginscreenState extends State<Loginscreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 🛡️ Check if it's the Admin
     if (email == _adminEmail && password == _adminPassword) {
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
@@ -73,7 +70,6 @@ class _LoginscreenState extends State<Loginscreen> {
       }
     }
 
-    // 👤 Normal User Login
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
@@ -89,6 +85,45 @@ class _LoginscreenState extends State<Loginscreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? "Login failed"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      
+      // 🛠️ Force the account picker to show every time by signing out first
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, "/MainPage");
+      }
+    } catch (e) {
+      print("Google Sign-In Error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Google Sign-In failed. Please try again."), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -169,6 +204,25 @@ class _LoginscreenState extends State<Loginscreen> {
                                   : const Text("Sign In", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               ),
                             ),
+                            
+                            const SizedBox(height: 15),
+                            const Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 15),
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: OutlinedButton.icon(
+                                icon: Image.asset("assets/google.png", height: 24),
+                                label: const Text("Continue with Google", style: TextStyle(color: Colors.black87, fontSize: 16)),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Colors.grey),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: _isLoading ? null : _signInWithGoogle,
+                              ),
+                            ),
+
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,

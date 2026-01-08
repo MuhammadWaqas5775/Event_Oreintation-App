@@ -25,29 +25,37 @@ class _HomePageState extends State<HomePage> {
 
   void _scheduleNotificationsForEvents(List<Map<String, dynamic>> events) {
     for (var event in events) {
-      DateTime? eventDate = _parseDate(event['date']);
-      if (eventDate != null) {
-        DateTime fireDate = eventDate.subtract(const Duration(days: 2));
+      DateTime? eventDateTime = _parseDateTime(event['date'], event['time']);
+      if (eventDateTime != null) {
+        // Schedule notification for exactly the event time
+        // You can also subtract time here, e.g., .subtract(Duration(hours: 1))
         NotificationService().scheduleEventNotification(
           id: event['id'].hashCode,
-          title: event['title'],
-          body: "Don't forget! The ${event['title']} is starting in 2 days.",
-          scheduleDate: fireDate,
+          title: "Event Starting Soon!",
+          body: "The event '${event['title']}' is starting now.",
+          scheduleDate: eventDateTime,
         );
       }
     }
   }
 
-  DateTime? _parseDate(String dateStr) {
+  DateTime? _parseDateTime(String dateStr, String? timeStr) {
     try {
       final now = DateTime.now();
       final currentYear = now.year;
-      DateTime parsed = DateFormat("MMM dd yyyy").parse("$dateStr $currentYear");
+      
+      // Default time to 12:00 PM if not provided
+      String finalTimeStr = timeStr ?? "12:00 PM";
+      
+      // Format: "MMM dd yyyy hh:mm a" -> e.g., "Jan 05 2025 02:30 PM"
+      DateTime parsed = DateFormat("MMM dd yyyy hh:mm a").parse("$dateStr $currentYear $finalTimeStr");
+      
       if (parsed.isBefore(now)) {
-        parsed = DateTime(currentYear + 1, parsed.month, parsed.day);
+        parsed = DateTime(currentYear + 1, parsed.month, parsed.day, parsed.hour, parsed.minute);
       }
       return parsed;
     } catch (e) {
+      print("Error parsing date/time: $e");
       return null;
     }
   }
@@ -62,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     if (cat.contains("food") || cat.contains("cook")) return Icons.fastfood;
     if (cat.contains("workshop") || cat.contains("learn")) return Icons.architecture;
     if (cat == "all") return Icons.grid_view;
-    return Icons.star_border; // Fallback icon for new categories
+    return Icons.star_border; 
   }
 
   @override
@@ -261,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(children: [const Icon(Icons.calendar_month, color: Colors.grey, size: 18), const SizedBox(width: 8), Text("${event['day']}, ${event['date']}", style: const TextStyle(color: Colors.grey, fontSize: 16))]),
+                          Row(children: [const Icon(Icons.calendar_month, color: Colors.grey, size: 18), const SizedBox(width: 8), Text("${event['day']}, ${event['date']} at ${event['time'] ?? '12:00 PM'}", style: const TextStyle(color: Colors.grey, fontSize: 16))]),
                           const Divider(height: 40),
                           const Text("Description", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),

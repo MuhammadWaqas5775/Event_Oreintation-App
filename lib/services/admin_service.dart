@@ -22,6 +22,7 @@ class AdminService {
     required String title,
     required String category,
     required String date,
+    required String time,
     required String day,
     required String price,
     required String description,
@@ -31,39 +32,30 @@ class AdminService {
     String? imageUrl;
     
     if (imageFile != null) {
-      print("Starting image upload to Cloudinary...");
       try {
         final CloudinaryResponse response = await _cloudinary.uploadFile(
           CloudinaryFile.fromFile(imageFile.path, resourceType: CloudinaryResourceType.Image),
         );
         imageUrl = response.secureUrl;
-        print("Image uploaded successfully! URL: $imageUrl");
       } catch (e) {
-        print("Cloudinary Upload Error: $e");
         throw Exception("Cloudinary Upload Failed: $e");
       }
     }
 
-    if (imageUrl == null || imageUrl.isEmpty) {
-      print("Warning: Image URL is null or empty after upload. Using placeholder.");
-      imageUrl = ""; // You can put a default image URL here if you want
-    }
-
-    print("Saving event to Firestore...");
     await _firestore.collection('events').add({
       'title': title,
       'category': category,
       'date': date,
+      'time': time,
       'day': day,
       'price': price,
       'detail': [{
         'description': description,
-        'imgurl': imageUrl,
+        'imgurl': imageUrl ?? "",
       }],
       'subevents': subEvents,
       'createdAt': FieldValue.serverTimestamp(),
     });
-    print("Event saved to Firestore successfully!");
   }
 
   Future<void> updateEvent({
@@ -71,6 +63,7 @@ class AdminService {
     required String title,
     required String category,
     required String date,
+    required String time,
     required String day,
     required String price,
     required String description,
@@ -81,15 +74,12 @@ class AdminService {
     String? imageUrl = existingImageUrl;
     
     if (newImageFile != null) {
-      print("Uploading new image to Cloudinary...");
       try {
         final CloudinaryResponse response = await _cloudinary.uploadFile(
           CloudinaryFile.fromFile(newImageFile.path, resourceType: CloudinaryResourceType.Image),
         );
         imageUrl = response.secureUrl;
-        print("New image uploaded: $imageUrl");
       } catch (e) {
-        print("Cloudinary Update Error: $e");
         throw Exception("Cloudinary Update Failed: $e");
       }
     }
@@ -98,6 +88,7 @@ class AdminService {
       'title': title,
       'category': category,
       'date': date,
+      'time': time,
       'day': day,
       'price': price,
       'detail': [{
@@ -106,7 +97,6 @@ class AdminService {
       }],
       'subevents': subEvents,
     });
-    print("Event updated in Firestore.");
   }
 
   Future<void> deleteEvent(String eventId) async {

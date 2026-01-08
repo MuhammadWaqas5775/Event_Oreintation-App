@@ -183,7 +183,7 @@ class EventManagement extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
-                    Text("${event['category']} • ${event['date']}",
+                    Text("${event['category']} • ${event['date']} ${event['time'] ?? ''}",
                         style: const TextStyle(color: Colors.white60, fontSize: 13)),
                     Text("Rs ${event['price']}",
                         style: const TextStyle(
@@ -309,7 +309,7 @@ class EventDialog extends StatefulWidget {
 class _EventDialogState extends State<EventDialog> {
   final _formKey = GlobalKey<FormState>();
   final AdminService _adminService = AdminService();
-  late TextEditingController _title, _cat, _date, _day, _price, _desc;
+  late TextEditingController _title, _cat, _date, _day, _price, _desc, _time;
   List<Map<String, dynamic>> _subEvents = [];
   XFile? _imageFile;
   bool _isSaving = false;
@@ -320,6 +320,7 @@ class _EventDialogState extends State<EventDialog> {
     _title = TextEditingController(text: widget.event?['title']);
     _cat = TextEditingController(text: widget.event?['category']);
     _date = TextEditingController(text: widget.event?['date']);
+    _time = TextEditingController(text: widget.event?['time'] ?? "12:00 PM");
     _day = TextEditingController(text: widget.event?['day']);
     _price = TextEditingController(text: widget.event?['price']);
     _desc = TextEditingController(text: widget.event?['detail'][0]['description']);
@@ -334,6 +335,18 @@ class _EventDialogState extends State<EventDialog> {
 
   void _removeSubEvent(int index) {
     setState(() => _subEvents.removeAt(index));
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _time.text = picked.format(context);
+      });
+    }
   }
 
   @override
@@ -396,11 +409,19 @@ class _EventDialogState extends State<EventDialog> {
                 _buildField(_cat, "Category", Icons.category),
                 Row(
                   children: [
-                    Expanded(child: _buildField(_date, "Date", Icons.calendar_today)),
+                    Expanded(child: _buildField(_date, "Date (e.g. Jan 05)", Icons.calendar_today)),
                     const SizedBox(width: 10),
-                    Expanded(child: _buildField(_day, "Day", Icons.access_time)),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _selectTime,
+                        child: AbsorbPointer(
+                          child: _buildField(_time, "Time", Icons.access_time),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+                _buildField(_day, "Day (e.g. Sunday)", Icons.today),
                 _buildField(_price, "Price", Icons.attach_money),
                 _buildField(_desc, "Description", Icons.description, maxLines: 3),
                 const SizedBox(height: 20),
@@ -503,6 +524,7 @@ class _EventDialogState extends State<EventDialog> {
             title: _title.text,
             category: _cat.text,
             date: _date.text,
+            time: _time.text,
             day: _day.text,
             price: _price.text,
             description: _desc.text,
@@ -514,6 +536,7 @@ class _EventDialogState extends State<EventDialog> {
             title: _title.text,
             category: _cat.text,
             date: _date.text,
+            time: _time.text,
             day: _day.text,
             price: _price.text,
             description: _desc.text,

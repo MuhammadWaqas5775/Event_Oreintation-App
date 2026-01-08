@@ -60,4 +60,5 @@ flutter:
     - assets/food.jpg
     - assets/music.jpg
     - assets/bussiness.jpg
+    - assets/google.png
     - .env
