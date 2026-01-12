@@ -223,17 +223,7 @@ class _LoginscreenState extends State<Loginscreen> {
                               ),
                             ),
 
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text("Don't have an account?"),
-                                TextButton(
-                                  onPressed: () => Navigator.pushNamed(context, "/Signupscreen"),
-                                  child: const Text("Sign Up"),
-                                ),
-                              ],
-                            ),
+
                           ],
                         ),
                       ),

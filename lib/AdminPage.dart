@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ueo_app/services/admin_service.dart';
+import 'package:ueo_app/Signupscreen.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -74,7 +75,16 @@ class _AdminPageState extends State<AdminPage> {
               icon: const Icon(Icons.add),
               backgroundColor: Colors.deepPurpleAccent,
             )
-          : null,
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Signupscreen(showBackButton: true)),
+                );
+              },
+              child: const Icon(Icons.add),
+              backgroundColor: Colors.deepPurpleAccent,
+            ),
     );
   }
 

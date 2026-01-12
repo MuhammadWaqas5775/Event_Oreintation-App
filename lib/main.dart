@@ -7,17 +7,17 @@ import 'package:ueo_app/SplashScreen.dart';
 import 'package:ueo_app/theme_provider.dart';
 import 'package:ueo_app/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'Loginscreen.dart';
-import 'Signupscreen.dart';
-import 'HomePage.dart';
-import 'MainPage.dart';
-import 'Memories.dart';
-import 'Profile.dart';
-import 'Mapscreen.dart';
-import 'Settings.dart';
-import 'AboutUs.dart';
-import 'ChatScreen.dart';
-import 'NotificationTestPage.dart';
+import 'package:ueo_app/Loginscreen.dart';
+import 'package:ueo_app/Signupscreen.dart';
+import 'package:ueo_app/HomePage.dart';
+import 'package:ueo_app/MainPage.dart';
+import 'package:ueo_app/Memories.dart';
+import 'package:ueo_app/Profile.dart';
+import 'package:ueo_app/Mapscreen.dart';
+import 'package:ueo_app/Settings.dart';
+import 'package:ueo_app/AboutUs.dart';
+import 'package:ueo_app/ChatScreen.dart';
+// import 'package:ueo_app/NotificationTestPage.dart'; // File appears to be missing
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
             "/AboutUs": (context) => const AboutUs(),
             "/ChatScreen": (context) => const ChatScreen(),
             "/AdminPage": (context) => const AdminPage(),
-            "/NotificationTest": (context) => const NotificationTestPage(),
+            // "/NotificationTest": (context) => const NotificationTestPage(), // Commented out as NotificationTestPage.dart is missing
           },
           debugShowCheckedModeBanner: false,
         );

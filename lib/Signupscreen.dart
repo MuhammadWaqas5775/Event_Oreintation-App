@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Signupscreen extends StatefulWidget {
-  const Signupscreen({super.key});
+  final bool showBackButton;
+  const Signupscreen({super.key, this.showBackButton = false});
 
   @override
   State<Signupscreen> createState() => _SignupscreenState();
@@ -40,7 +41,26 @@ class _SignupscreenState extends State<Signupscreen> {
         });
 
         if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+          if (widget.showBackButton) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Success'),
+                content: const Text('User added successfully!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+          }
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -57,10 +77,19 @@ class _SignupscreenState extends State<Signupscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.showBackButton
+          ? AppBar(
+              title: const Text("Add User"),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            )
+          : null,
       body: Stack(
         children: [
           Positioned.fill(child: Image.asset("assets/background.png", fit: BoxFit.cover)),
-          Container(color: Colors.black.withValues(alpha: 0.5)),
+          Container(color: Colors.black.withOpacity(0.5)),
           
           Center(
             child: SingleChildScrollView(
@@ -74,7 +103,7 @@ class _SignupscreenState extends State<Signupscreen> {
                   
                   Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withOpacity(0.9),
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Form(
@@ -122,10 +151,11 @@ class _SignupscreenState extends State<Signupscreen> {
                                   : const Text("Sign Up", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               ),
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Already have an account? Sign In"),
-                            ),
+                            if (!widget.showBackButton)
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("Already have an account? Sign In"),
+                              ),
                           ],
                         ),
                       ),
