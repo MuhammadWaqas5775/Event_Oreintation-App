@@ -97,7 +97,6 @@ class _LoginscreenState extends State<Loginscreen> {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn();
       
-      // 🛠️ Force the account picker to show every time by signing out first
       await googleSignIn.signOut();
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();

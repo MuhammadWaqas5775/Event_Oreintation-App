@@ -17,27 +17,21 @@ import 'package:ueo_app/Mapscreen.dart';
 import 'package:ueo_app/Settings.dart';
 import 'package:ueo_app/AboutUs.dart';
 import 'package:ueo_app/ChatScreen.dart';
-// import 'package:ueo_app/NotificationTestPage.dart'; // File appears to be missing
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 1. Load Environment Variables
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
     print("Error loading .env file: $e");
   }
 
-  // 2. Initialize Stripe
-  // Fallback to empty string if key is missing to avoid crash
   Stripe.publishableKey = dotenv.env['stripePublishablekey'] ?? "";
   await Stripe.instance.applySettings();
 
-  // 3. Initialize Firebase
   await Firebase.initializeApp();
 
-  // 4. Initialize Notifications
   await NotificationService().init();
   
   runApp(

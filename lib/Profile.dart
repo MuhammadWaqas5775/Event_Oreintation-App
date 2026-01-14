@@ -18,6 +18,11 @@ class _ProfileState extends State<Profile> {
   late final CloudinaryPublic cloudinary;
   File? _image;
   final _nameController = TextEditingController();
+  
+  // New Controllers for Password Update
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +36,9 @@ class _ProfileState extends State<Profile> {
   @override
   void dispose() {
     _nameController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -113,27 +121,87 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  // Implementation of Reset Password
-  Future<void> _handlePasswordReset() async {
-    if (user?.email == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No email found for this user.")),
-      );
+  // --- NEW: MANUAL PASSWORD UPDATE DIALOG ---
+  void _showUpdatePasswordDialog() {
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text("Update Password", style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPasswordField(_currentPasswordController, "Current Password"),
+            const SizedBox(height: 10),
+            _buildPasswordField(_newPasswordController, "New Password"),
+            const SizedBox(height: 10),
+            _buildPasswordField(_confirmPasswordController, "Confirm New Password"),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          ElevatedButton(
+            onPressed: _handleManualPasswordUpdate,
+            child: const Text("Update"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(TextEditingController controller, String label) {
+    return TextFormField(
+      controller: controller,
+      obscureText: true,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.deepPurple), borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  Future<void> _handleManualPasswordUpdate() async {
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (currentPassword.isEmpty || newPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("All fields are required")));
       return;
     }
+
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
+      return;
+    }
+
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!);
+      // 1. Re-authenticate the user
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user!.email!,
+        password: currentPassword,
+      );
+
+      await user!.reauthenticateWithCredential(credential);
+
+      // 2. Update the password
+      await user!.updatePassword(newPassword);
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Reset email sent to ${user!.email}")),
-        );
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Password updated successfully!")));
       }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("An error occurred. Please try again.")));
     }
   }
 
@@ -148,11 +216,11 @@ class _ProfileState extends State<Profile> {
           children: [
             ListTile(
               leading: const Icon(Icons.lock_reset, color: Colors.white70),
-              title: const Text("Reset Password", style: TextStyle(color: Colors.white)),
-              subtitle: const Text("Receive reset link via email", style: TextStyle(color: Colors.white54, fontSize: 12)),
+              title: const Text("Update Password", style: TextStyle(color: Colors.white)),
+              subtitle: const Text("Change your password manually", style: TextStyle(color: Colors.white54, fontSize: 12)),
               onTap: () {
                 Navigator.pop(context);
-                _handlePasswordReset();
+                _showUpdatePasswordDialog();
               },
             ),
             ListTile(
@@ -333,7 +401,9 @@ class _ProfileState extends State<Profile> {
                       children: [
                         _buildProfileOption(Icons.edit, "Edit Profile", () => _showUpdateProfileDialog(context, name)),
                         const Divider(color: Colors.white12, height: 1),
-                        _buildProfileOption(Icons.notifications_none, "Notifications", () {}),
+                        _buildProfileOption(Icons.notifications_none, "Notifications", () {
+                          Navigator.pushNamed(context, "/RegisteredEvents");
+                        }),
                         const Divider(color: Colors.white12, height: 1),
                         _buildProfileOption(Icons.security, "Security", _showSecurityDialog),
                         const Divider(color: Colors.white12, height: 1),

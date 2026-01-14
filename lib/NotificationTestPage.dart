@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ueo_app/notification_service.dart';
 
-/// Simple test page for testing notification functionality
 class NotificationTestPage extends StatefulWidget {
   const NotificationTestPage({super.key});
 
@@ -19,7 +18,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     _checkPermission();
   }
 
-  /// Check if exact alarm permission is granted
   Future<void> _checkPermission() async {
     final hasPermission = await NotificationService().canScheduleExactAlarms();
     setState(() {
@@ -30,7 +28,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     });
   }
 
-  /// Request exact alarm permission
   Future<void> _requestPermission() async {
     setState(() {
       _statusMessage = 'Opening system settings...';
@@ -38,12 +35,10 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     
     await NotificationService().requestExactAlarmPermission();
     
-    // Wait a bit and recheck (user might have granted permission)
     await Future.delayed(const Duration(seconds: 1));
     await _checkPermission();
   }
 
-  /// Test instant notification
   Future<void> _testInstantNotification() async {
     setState(() {
       _statusMessage = 'Sending instant notification...';
@@ -56,7 +51,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
     });
   }
 
-  /// Test 10-second scheduled notification
   Future<void> _test10SecondNotification() async {
     final now = DateTime.now();
     final scheduledFor = now.add(const Duration(seconds: 10));
@@ -87,7 +81,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Status Card
             Card(
               color: _hasPermission == true ? Colors.green.shade50 : Colors.orange.shade50,
               child: Padding(
@@ -146,7 +139,6 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             
             const SizedBox(height: 32),
             
-            // Test Notifications Section
             const Text(
               'Test Notifications',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

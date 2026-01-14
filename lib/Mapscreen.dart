@@ -57,7 +57,7 @@ class _MapscreenState extends State<Mapscreen> {
               ),
             ),
           ),
-          const SizedBox(height: 80), // Space for bottom navigation
+          const SizedBox(height: 80),
         ],
       ),
     );

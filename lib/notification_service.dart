@@ -11,14 +11,12 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  // 🔔 NEW CHANNEL ID (To reset any old settings)
   static const String _channelId = 'ueo_high_priority_channel';
 
   Future<void> init() async {
     print("Initializing NotificationService...");
     tz.initializeTimeZones();
 
-    // Use @mipmap/ic_launcher as it is standard for resources in mipmap
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(android: androidSettings);
 
@@ -35,7 +33,6 @@ class NotificationService {
               AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidPlugin != null) {
-        // Create a very high importance channel
         await androidPlugin.createNotificationChannel(const AndroidNotificationChannel(
           _channelId,
           'UEO Event Notifications',
@@ -63,7 +60,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.max,
           showWhen: true,
-          fullScreenIntent: true, // Helps wake up screen on some devices
+          fullScreenIntent: true,
         ),
       ),
     );
@@ -118,7 +115,6 @@ class NotificationService {
     );
   }
 
-  // Fallbacks for the Test Page UI
   Future<bool> canScheduleExactAlarms() async => true;
   Future<void> requestExactAlarmPermission() async {}
 }

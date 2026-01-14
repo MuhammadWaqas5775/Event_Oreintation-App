@@ -27,8 +27,6 @@ class _HomePageState extends State<HomePage> {
     for (var event in events) {
       DateTime? eventDateTime = _parseDateTime(event['date'], event['time']);
       if (eventDateTime != null) {
-        // Schedule notification for exactly the event time
-        // You can also subtract time here, e.g., .subtract(Duration(hours: 1))
         NotificationService().scheduleEventNotification(
           id: event['id'].hashCode,
           title: "Event Starting Soon!",
@@ -44,10 +42,8 @@ class _HomePageState extends State<HomePage> {
       final now = DateTime.now();
       final currentYear = now.year;
       
-      // Default time to 12:00 PM if not provided
       String finalTimeStr = timeStr ?? "12:00 PM";
       
-      // Format: "MMM dd yyyy hh:mm a" -> e.g., "Jan 05 2025 02:30 PM"
       DateTime parsed = DateFormat("MMM dd yyyy hh:mm a").parse("$dateStr $currentYear $finalTimeStr");
       
       if (parsed.isBefore(now)) {
@@ -60,7 +56,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Improved Category Icon Logic
   IconData _getCategoryIcon(String category) {
     String cat = category.toLowerCase().trim();
     if (cat.contains("music") || cat.contains("art")) return Icons.music_note;

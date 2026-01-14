@@ -6,7 +6,6 @@ class AdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CloudinaryPublic _cloudinary = CloudinaryPublic('dcfpfknn1', 'ueoapp', cache: false);
 
-  // --- Event Management ---
 
   Stream<List<Map<String, dynamic>>> getEvents() {
     return _firestore.collection('events').snapshots().map((snapshot) {
@@ -103,7 +102,6 @@ class AdminService {
     await _firestore.collection('events').doc(eventId).delete();
   }
 
-  // --- User Management ---
 
   Stream<List<Map<String, dynamic>>> getUsers() {
     return _firestore.collection('users').snapshots().map((snapshot) {

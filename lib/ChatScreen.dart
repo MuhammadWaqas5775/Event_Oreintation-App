@@ -28,7 +28,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _textController.clear();
 
-    // Fetch the user's name from the 'users' collection
     String senderName = user.displayName ?? user.email ?? 'Anonymous'; // Fallback
     try {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
@@ -39,16 +38,14 @@ class _ChatScreenState extends State<ChatScreen> {
       print("Error fetching user name: $e");
     }
 
-    // Add the message with sender's UID and name
     _firestore.collection('messages').add({
       'text': text,
       'senderName': senderName,
-      'senderUid': user.uid, // Crucial for message alignment
+      'senderUid': user.uid,
       'timestamp': FieldValue.serverTimestamp(),
     });
   }
 
-  // Widget to build a decorative chat bubble
   Widget _buildMessageItem(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
     final currentUser = _auth.currentUser;
@@ -130,7 +127,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   reverse: true,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    // Use the new message item builder
                     return _buildMessageItem(snapshot.data!.docs[index]);
                   },
                 );

@@ -19,17 +19,14 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // Navigation State
   int currentIndex = 0;
   late CircularBottomNavigationController _navController;
 
-  // User & Profile State
   final User? user = FirebaseAuth.instance.currentUser;
   String? _imageUrl;
   late final CloudinaryPublic cloudinary;
   late final DocumentReference<Map<String, dynamic>> _userDoc;
 
-  // Tab items for bottom navigation
   final List<TabItem> tabItems = [
     TabItem(Icons.calendar_month, "Schedule", Colors.deepPurple),
     TabItem(Icons.image, "Memories", Colors.deepPurple),
@@ -57,7 +54,6 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  // --- Profile Logic ---
 
   Future<void> _loadProfileImage() async {
     final snapshot = await _userDoc.get();
@@ -89,7 +85,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  // --- UI Components ---
 
   List<Widget> get _pages => [
     const HomePage(),
@@ -137,7 +132,7 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title:  const Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
-        elevation: 0,
+
       ),
       body: Stack(
         children: [

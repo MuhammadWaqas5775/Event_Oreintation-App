@@ -66,7 +66,7 @@ class _SignupscreenState extends State<Signupscreen> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? "Signup failed"), backgroundColor: Colors.red),
+          SnackBar(content: Text(e.message ?? " failed to add user"), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -97,8 +97,6 @@ class _SignupscreenState extends State<Signupscreen> {
               child: Column(
                 children: [
                    Icon(Icons.person_add_outlined, size: 80, color: Colors.white),
-                   Text("Create Account", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-                   Text("Sign up to get started", style: TextStyle(color: Colors.white70)),
                    SizedBox(height: 30),
                   
                   Card(
@@ -148,14 +146,10 @@ class _SignupscreenState extends State<Signupscreen> {
                                 onPressed: _isLoading ? null : _signup,
                                 child: _isLoading 
                                   ? const CircularProgressIndicator(color: Colors.white)
-                                  : const Text("Sign Up", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  : const Text("Add user", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               ),
                             ),
-                            if (!widget.showBackButton)
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Already have an account? Sign In"),
-                              ),
+
                           ],
                         ),
                       ),
