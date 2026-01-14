@@ -56,10 +56,11 @@ class StripeServices {
       };
 
       // Retrieve secret key from dotenv
-      String? stripeSecretKey = dotenv.env['stripeSecretkey'];
+      // We check for both capital 'K' and small 'k' to be 100% safe
+      String? stripeSecretKey = dotenv.env['stripeSecretKey'] ?? dotenv.env['stripeSecretkey'];
 
       if (stripeSecretKey == null || stripeSecretKey.isEmpty) {
-        print("Error: stripeSecretkey not found in .env file");
+        print("Error: stripeSecretKey not found in .env file");
         return null;
       }
 
