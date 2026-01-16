@@ -402,7 +402,7 @@ class _ProfileState extends State<Profile> {
                         _buildProfileOption(Icons.edit, "Edit Profile", () => _showUpdateProfileDialog(context, name)),
                         const Divider(color: Colors.white12, height: 1),
                         _buildProfileOption(Icons.notifications_none, "Notifications", () {
-                          Navigator.pushNamed(context, "/RegisteredEvents");
+                          Navigator.pushNamed(context, "/NotificationPage");
                         }),
                         const Divider(color: Colors.white12, height: 1),
                         _buildProfileOption(Icons.security, "Security", _showSecurityDialog),

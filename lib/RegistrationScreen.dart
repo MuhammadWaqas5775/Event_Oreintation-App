@@ -31,6 +31,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         'price': widget.price,
         'registrationDate': FieldValue.serverTimestamp(),
         'paymentStatus': 'success',
+        'isRead': false, // NEW FIELD: Track if notification is seen
       });
       print("Registration saved to Firestore");
     } catch (e) {
@@ -91,7 +92,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 }
 
                 if (success) {
-                  // SAVE TO FIREBASE HERE
                   await _saveRegistrationToFirestore();
 
                   if (mounted) {

@@ -8,11 +8,9 @@ class StripeServices {
 
   Future<bool> makePayment(int amount, String currency) async {
     try {
-      // 1. Create Payment Intent
       String? clientSecret = await _createPaymentIntent(amount, currency);
       if (clientSecret == null) return false;
 
-      // 2. Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -20,7 +18,6 @@ class StripeServices {
         ),
       );
 
-      // 3. Display Payment Sheet
       return await _displayPaymentSheet();
     } catch (e) {
       print("Error in makePayment: $e");
@@ -55,8 +52,6 @@ class StripeServices {
         'currency': currency,
       };
 
-      // Retrieve secret key from dotenv
-      // We check for both capital 'K' and small 'k' to be 100% safe
       String? stripeSecretKey = dotenv.env['stripeSecretKey'] ?? dotenv.env['stripeSecretkey'];
 
       if (stripeSecretKey == null || stripeSecretKey.isEmpty) {

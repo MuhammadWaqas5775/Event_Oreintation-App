@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ueo_app/RegistrationScreen.dart';
 import 'package:intl/intl.dart';
-import 'package:ueo_app/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,42 +17,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      NotificationService().showInstantNotification();
-    });
-  }
-
-  void _scheduleNotificationsForEvents(List<Map<String, dynamic>> events) {
-    for (var event in events) {
-      DateTime? eventDateTime = _parseDateTime(event['date'], event['time']);
-      if (eventDateTime != null) {
-        NotificationService().scheduleEventNotification(
-          id: event['id'].hashCode,
-          title: "Event Starting Soon!",
-          body: "The event '${event['title']}' is starting now.",
-          scheduleDate: eventDateTime,
-        );
-      }
-    }
-  }
-
-  DateTime? _parseDateTime(String dateStr, String? timeStr) {
-    try {
-      final now = DateTime.now();
-      final currentYear = now.year;
-      
-      String finalTimeStr = timeStr ?? "12:00 PM";
-      
-      DateTime parsed = DateFormat("MMM dd yyyy hh:mm a").parse("$dateStr $currentYear $finalTimeStr");
-      
-      if (parsed.isBefore(now)) {
-        parsed = DateTime(currentYear + 1, parsed.month, parsed.day, parsed.hour, parsed.minute);
-      }
-      return parsed;
-    } catch (e) {
-      print("Error parsing date/time: $e");
-      return null;
-    }
   }
 
   IconData _getCategoryIcon(String category) {
@@ -83,8 +46,6 @@ class _HomePageState extends State<HomePage> {
         }).toList();
 
         if (events.isEmpty) return const Center(child: Text("No events available", style: TextStyle(color: Colors.white70)));
-
-        _scheduleNotificationsForEvents(events);
 
         final categories = ["All", ...events.map((e) => e['category'] as String).toSet()];
         final filteredEvents = selectedCategory == "All"

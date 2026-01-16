@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:ueo_app/AdminPage.dart';
 import 'package:ueo_app/SplashScreen.dart';
 import 'package:ueo_app/theme_provider.dart';
-import 'package:ueo_app/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ueo_app/Loginscreen.dart';
 import 'package:ueo_app/Signupscreen.dart';
@@ -17,23 +16,26 @@ import 'package:ueo_app/Mapscreen.dart';
 import 'package:ueo_app/Settings.dart';
 import 'package:ueo_app/AboutUs.dart';
 import 'package:ueo_app/ChatScreen.dart';
+import 'package:ueo_app/RegisteredEventsPage.dart';
+import 'package:ueo_app/NotificationPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // 1. Load Environment Variables
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
     print("Error loading .env file: $e");
   }
 
-  Stripe.publishableKey = dotenv.env['stripePublishablekey'] ?? "";
+  // 2. Initialize Stripe
+  Stripe.publishableKey = dotenv.env['stripePublishableKey'] ?? dotenv.env['stripePublishablekey'] ?? "";
   await Stripe.instance.applySettings();
 
+  // 3. Initialize Firebase
   await Firebase.initializeApp();
 
-  await NotificationService().init();
-  
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
@@ -83,7 +85,8 @@ class MyApp extends StatelessWidget {
             "/AboutUs": (context) => const AboutUs(),
             "/ChatScreen": (context) => const ChatScreen(),
             "/AdminPage": (context) => const AdminPage(),
-            // "/NotificationTest": (context) => const NotificationTestPage(), // Commented out as NotificationTestPage.dart is missing
+            "/RegisteredEvents": (context) => const RegisteredEventsPage(),
+            "/NotificationPage": (context) => const NotificationPage(),
           },
           debugShowCheckedModeBanner: false,
         );

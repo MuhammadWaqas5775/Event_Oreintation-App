@@ -116,4 +116,19 @@ class AdminService {
   Future<void> deleteUser(String uid) async {
     await _firestore.collection('users').doc(uid).delete();
   }
+
+  // --- NEW: MEMORIES METHODS ---
+  Stream<List<Map<String, dynamic>>> getMemories() {
+    return _firestore.collection('memories').orderBy('timestamp', descending: true).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    });
+  }
+
+  Future<void> deleteMemory(String id) async {
+    await _firestore.collection('memories').doc(id).delete();
+  }
 }

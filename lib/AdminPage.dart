@@ -57,9 +57,7 @@ class _AdminPageState extends State<AdminPage> {
                       borderRadius:
                           const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
-                    child: _selectedIndex == 0
-                        ? const EventManagement()
-                        : const UserManagement(),
+                    child: _buildSelectedContent(),
                   ),
                 ),
               ],
@@ -67,25 +65,40 @@ class _AdminPageState extends State<AdminPage> {
           ),
         ],
       ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: () =>
-                  showDialog(context: context, builder: (_) => const EventDialog()),
-              label: const Text("Add Event"),
-              icon: const Icon(Icons.add),
-              backgroundColor: Colors.deepPurpleAccent,
-            )
-          : FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Signupscreen(showBackButton: true)),
-                );
-              },
-              child: const Icon(Icons.add),
-              backgroundColor: Colors.deepPurpleAccent,
-            ),
+      floatingActionButton: _buildFloatingActionButton(),
     );
+  }
+
+  Widget _buildSelectedContent() {
+    switch (_selectedIndex) {
+      case 0: return const EventManagement();
+      case 1: return const UserManagement();
+      case 2: return const MemoriesManagement();
+      default: return const EventManagement();
+    }
+  }
+
+  Widget? _buildFloatingActionButton() {
+    if (_selectedIndex == 0) {
+      return FloatingActionButton.extended(
+        onPressed: () => showDialog(context: context, builder: (_) => const EventDialog()),
+        label: const Text("Add Event"),
+        icon: const Icon(Icons.add),
+        backgroundColor: Colors.deepPurpleAccent,
+      );
+    } else if (_selectedIndex == 1) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Signupscreen(showBackButton: true)),
+          );
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.deepPurpleAccent,
+      );
+    }
+    return null; // No FAB for Memories tab
   }
 
   Widget _buildTabSwitcher() {
@@ -100,6 +113,7 @@ class _AdminPageState extends State<AdminPage> {
         children: [
           _tabItem(0, "Events", Icons.event_note),
           _tabItem(1, "Users", Icons.group),
+          _tabItem(2, "Uploads", Icons.cloud_upload),
         ],
       ),
     );
@@ -116,14 +130,15 @@ class _AdminPageState extends State<AdminPage> {
             color: isSelected ? Colors.deepPurpleAccent : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, color: isSelected ? Colors.white : Colors.white70, size: 20),
-              const SizedBox(width: 8),
+              const SizedBox(height: 4),
               Text(title,
                   style: TextStyle(
                       color: isSelected ? Colors.white : Colors.white70,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold)),
             ],
           ),
@@ -305,6 +320,105 @@ class UserManagement extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+// --- NEW: MEMORIES MANAGEMENT WIDGET ---
+class MemoriesManagement extends StatelessWidget {
+  const MemoriesManagement({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final adminService = AdminService();
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: adminService.getMemories(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.white)));
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final memories = snapshot.data!;
+        if (memories.isEmpty) {
+          return const Center(child: Text("No uploads found", style: TextStyle(color: Colors.white70)));
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: memories.length,
+          itemBuilder: (context, index) {
+            final memory = memories[index];
+            return Card(
+              color: Colors.white10,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                      child: Image.network(
+                        memory['imageUrl'],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            memory['userName'] ?? "User",
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
+                          onPressed: () => _confirmDeleteMemory(context, memory['id']),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteMemory(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text("Delete Image?", style: TextStyle(color: Colors.white)),
+        content: const Text("This memory will be removed permanently.", style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              AdminService().deleteMemory(id);
+              Navigator.pop(ctx);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
     );
   }
 }

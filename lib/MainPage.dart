@@ -132,7 +132,54 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title:  const Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
-
+        actions: [
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('registrations')
+                .where('userId', isEqualTo: user?.uid)
+                .where('isRead', isEqualTo: false) // ONLY COUNT UNREAD
+                .snapshots(),
+            builder: (context, snapshot) {
+              int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+              
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, color: Colors.white),
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/NotificationPage");
+                    },
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 11,
+                      top: 11,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
