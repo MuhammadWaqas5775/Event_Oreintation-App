@@ -110,60 +110,69 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text("Community Chat"),
         centerTitle: true,
       ),
-      body: Column(
-        children: <Widget>[
-          Flexible(
-            child: StreamBuilder(
-              stream: _firestore.collection('messages').orderBy('timestamp', descending: true).snapshots(),
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(8.0),
-                  reverse: true,
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _buildMessageItem(snapshot.data!.docs[index]);
-                  },
-                );
-              },
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Flexible(
+              child: StreamBuilder(
+                stream: _firestore.collection('messages').orderBy('timestamp', descending: true).snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    reverse: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _buildMessageItem(snapshot.data!.docs[index]);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          const Divider(height: 1.0),
-          Container(
-            decoration: BoxDecoration(color: Theme.of(context).cardColor),
-            child: IconTheme(
-              data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+            const Divider(height: 1.0),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: TextField(
-                        controller: _textController,
-                        onSubmitted: _handleSubmitted,
-                        decoration: const InputDecoration.collapsed(
-                          hintText: "Send a message",
+
+                decoration: BoxDecoration(
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(15.0),
+                    color: Theme.of(context).cardColor),
+                child: IconTheme(
+                  data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: <Widget>[
+                        Flexible(
+                          child: TextField(
+                            controller: _textController,
+                            onSubmitted: _handleSubmitted,
+                            decoration: const InputDecoration.collapsed(
+                              hintText: "Send a message",
+                            ),
+                          ),
                         ),
-                      ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () => _handleSubmitted(_textController.text),
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () => _handleSubmitted(_textController.text),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

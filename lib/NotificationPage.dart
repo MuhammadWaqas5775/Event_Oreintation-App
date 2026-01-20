@@ -44,7 +44,6 @@ class _NotificationPageState extends State<NotificationPage> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        // Removed .orderBy() to avoid needing a Firestore Index
         stream: FirebaseFirestore.instance
             .collection('registrations')
             .where('userId', isEqualTo: userId)
@@ -60,7 +59,6 @@ class _NotificationPageState extends State<NotificationPage> {
             );
           }
 
-          // Sort the documents in memory (Newest First)
           final docs = snapshot.data!.docs;
           docs.sort((a, b) {
             Timestamp t1 = a['registrationDate'] ?? Timestamp.now();

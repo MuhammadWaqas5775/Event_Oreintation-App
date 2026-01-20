@@ -1,4 +1,4 @@
-import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +8,6 @@ import 'package:circular_bottom_navigation/tab_item.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ueo_app/HomePage.dart';
 import 'Memories.dart';
-import 'Mapscreen.dart';
 import 'Profile.dart';
 
 class MainPage extends StatefulWidget {
@@ -30,7 +29,7 @@ class _MainPageState extends State<MainPage> {
   final List<TabItem> tabItems = [
     TabItem(Icons.calendar_month, "Schedule", Colors.deepPurple),
     TabItem(Icons.image, "Memories", Colors.deepPurple),
-    TabItem(Icons.location_on, "Location", Colors.deepPurple),
+    // TabItem(Icons.location_on, "Location", Colors.deepPurple),
     TabItem(Icons.person, "Profile", Colors.deepPurple),
   ];
   Future<void> _chat()async{
@@ -89,7 +88,6 @@ class _MainPageState extends State<MainPage> {
   List<Widget> get _pages => [
     const HomePage(),
     const Memories(),
-    const Mapscreen(),
     const Profile(),
   ];
 
@@ -97,38 +95,6 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      drawer:Drawer(
-        child: Container(
-          color: Colors.grey[600],
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              UserAccountsDrawerHeader(
-                decoration: const BoxDecoration(color: Colors.transparent),
-                currentAccountPicture: GestureDetector(
-                  onTap: _pickAndUploadImage,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white24,
-                    backgroundImage: _imageUrl != null ? NetworkImage(_imageUrl!) : null,
-                    child: _imageUrl == null ? const Icon(Icons.camera_alt, color: Colors.white) : null,
-                  ),
-                ),
-                accountName: Text(user?.displayName ?? "User"),
-                accountEmail: Text(user?.email ?? "user@example.com"),
-              ),
-              _drawerItem(Icons.home, "Home", () => Navigator.pushNamed(context,"/MainPage")),
-              _drawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
-              _drawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
-              _drawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
-
-              const Divider(color: Colors.white24),
-              _drawerItem(Icons.logout, "Logout", () {
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-              }),
-            ],
-          ),
-        ),
-      ),
       appBar: AppBar(
         title:  const Text("UEO App", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -137,11 +103,11 @@ class _MainPageState extends State<MainPage> {
             stream: FirebaseFirestore.instance
                 .collection('registrations')
                 .where('userId', isEqualTo: user?.uid)
-                .where('isRead', isEqualTo: false) // ONLY COUNT UNREAD
+                .where('isRead', isEqualTo: false)
                 .snapshots(),
             builder: (context, snapshot) {
               int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
-              
+
               return Stack(
                 children: [
                   IconButton(
@@ -181,6 +147,39 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
+      drawer:Drawer(
+        child: Container(
+          color: Colors.grey[600],
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: const BoxDecoration(color: Colors.transparent),
+                currentAccountPicture: GestureDetector(
+                  onTap: _pickAndUploadImage,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white24,
+                    backgroundImage: _imageUrl != null ? NetworkImage(_imageUrl!) : null,
+                    child: _imageUrl == null ? const Icon(Icons.camera_alt, color: Colors.white) : null,
+                  ),
+                ),
+                accountName: Text(user?.displayName ?? "User"),
+                accountEmail: Text(user?.email ?? "user@example.com"),
+              ),
+              _drawerItem(Icons.home, "Home", () => Navigator.pushNamed(context,"/MainPage")),
+              _drawerItem(Icons.person, "Profile", () => Navigator.pushNamed(context, "/Profile")),
+              _drawerItem(Icons.settings, "Settings", () => Navigator.pushNamed(context, "/Settings")),
+              _drawerItem(Icons.info, "About Us", () => Navigator.pushNamed(context, "/AboutUs")),
+
+              const Divider(color: Colors.white24),
+              _drawerItem(Icons.logout, "Logout", () {
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              }),
+            ],
+          ),
+        ),
+      ),
+
       body: Stack(
         children: [
           Positioned.fill(child: Image.asset("assets/background.png", fit: BoxFit.cover)),

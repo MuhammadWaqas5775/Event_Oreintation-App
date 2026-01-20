@@ -12,17 +12,14 @@ import 'package:ueo_app/HomePage.dart';
 import 'package:ueo_app/MainPage.dart';
 import 'package:ueo_app/Memories.dart';
 import 'package:ueo_app/Profile.dart';
-import 'package:ueo_app/Mapscreen.dart';
 import 'package:ueo_app/Settings.dart';
 import 'package:ueo_app/AboutUs.dart';
 import 'package:ueo_app/ChatScreen.dart';
-import 'package:ueo_app/RegisteredEventsPage.dart';
 import 'package:ueo_app/NotificationPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 1. Load Environment Variables
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
@@ -79,13 +76,11 @@ class MyApp extends StatelessWidget {
             "/MainPage": (context) => const MainPage(),
             "/HomePage": (context) => const HomePage(),
             "/Memories": (context) => const Memories(),
-            "/Map": (context) => const Mapscreen(),
             "/Profile": (context) => const Profile(),
             "/Settings": (context) => const Settings(),
             "/AboutUs": (context) => const AboutUs(),
             "/ChatScreen": (context) => const ChatScreen(),
             "/AdminPage": (context) => const AdminPage(),
-            "/RegisteredEvents": (context) => const RegisteredEventsPage(),
             "/NotificationPage": (context) => const NotificationPage(),
           },
           debugShowCheckedModeBanner: false,

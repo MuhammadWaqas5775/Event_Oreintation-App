@@ -117,7 +117,12 @@ class _SignupscreenState extends State<Signupscreen> {
                             TextFormField(
                               controller: _emailController,
                               decoration: const InputDecoration(labelText: "Email", prefixIcon: Icon(Icons.email)),
-                              validator: (v) => (v == null || !v.contains('@')) ? "Enter valid email" : null,
+                              validator: (v){
+                               if (v == null ||v.isEmpty) return "Enter email";
+                               final bool isGmail=RegExp(r'^[\w-\.]+@gmail\.com$').hasMatch(v);
+                               if(!isGmail) return "Invalid email";
+                               return null;
+                              }
                             ),
                             const SizedBox(height: 15),
                             TextFormField(

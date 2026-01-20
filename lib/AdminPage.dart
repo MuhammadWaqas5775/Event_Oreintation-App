@@ -98,7 +98,7 @@ class _AdminPageState extends State<AdminPage> {
         backgroundColor: Colors.deepPurpleAccent,
       );
     }
-    return null; // No FAB for Memories tab
+    return null;
   }
 
   Widget _buildTabSwitcher() {
@@ -324,7 +324,6 @@ class UserManagement extends StatelessWidget {
   }
 }
 
-// --- NEW: MEMORIES MANAGEMENT WIDGET ---
 class MemoriesManagement extends StatelessWidget {
   const MemoriesManagement({super.key});
 
