@@ -34,6 +34,19 @@ Cloudinary
 Stripe API
 
 REST APIs
+## 📸 Screenshots
+
+### Authentication
+<img src="screenshots/login.png" width="250"/> 
+
+### Events
+<img src="screenshots/events.png" width="250"/> 
+
+### Booking & Payment
+ <img src="screenshots/payment.png" width="250"/>
+
+### Confirmation
+<img src="screenshots/success.png" width="250"/>
 
 🔹 **How to Run**
 
