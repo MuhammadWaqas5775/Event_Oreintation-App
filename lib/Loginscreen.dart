@@ -76,7 +76,6 @@ class _LoginscreenState extends State<Loginscreen> {
       }
     }
 
-    // Standard User Login
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
@@ -95,7 +94,7 @@ class _LoginscreenState extends State<Loginscreen> {
             content: Text(e.message ?? "Login failed"), 
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+            margin: const EdgeInsets.only(bottom: 700, left: 20, right: 20),
           ),
         );
       }
@@ -209,7 +208,6 @@ class _LoginscreenState extends State<Loginscreen> {
                               return "Email is required";
                             }
 
-                            // Allow admin email explicitly
                             if (v.trim() == _adminEmail) {
                               return null;
                             }

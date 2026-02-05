@@ -19,7 +19,6 @@ class _ProfileState extends State<Profile> {
   File? _image;
   final _nameController = TextEditingController();
   
-  // New Controllers for Password Update
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();

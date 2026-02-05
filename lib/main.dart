@@ -26,11 +26,9 @@ void main() async {
     print("Error loading .env file: $e");
   }
 
-  // 2. Initialize Stripe
   Stripe.publishableKey = dotenv.env['stripePublishableKey'] ?? dotenv.env['stripePublishablekey'] ?? "";
   await Stripe.instance.applySettings();
 
-  // 3. Initialize Firebase
   await Firebase.initializeApp();
 
   runApp(

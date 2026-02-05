@@ -117,7 +117,6 @@ class AdminService {
     await _firestore.collection('users').doc(uid).delete();
   }
 
-  // --- NEW: MEMORIES METHODS ---
   Stream<List<Map<String, dynamic>>> getMemories() {
     return _firestore.collection('memories').orderBy('timestamp', descending: true).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {

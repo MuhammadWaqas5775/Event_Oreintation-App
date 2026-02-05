@@ -436,7 +436,11 @@ class _EventDialogState extends State<EventDialog> {
   List<Map<String, dynamic>> _subEvents = [];
   XFile? _imageFile;
   bool _isSaving = false;
-
+  final List<String> categories = [
+    "Workshop",
+    "Sports",
+    "Other",
+  ];
   @override
   void initState() {
     super.initState();
@@ -529,7 +533,40 @@ class _EventDialogState extends State<EventDialog> {
                 ),
                 const SizedBox(height: 16),
                 _buildField(_title, "Title", Icons.title),
-                _buildField(_cat, "Category", Icons.category),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: DropdownButtonFormField<String>(
+                    dropdownColor: Colors.deepPurple,
+                    decoration: InputDecoration(
+                      labelText: "Category",
+                      prefixIcon: const Icon(Icons.category, color: Colors.white38, size: 20),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      labelStyle: const TextStyle(color: Colors.white38),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.deepPurpleAccent, width: 1),
+                      ),
+                    ),
+                    items: categories.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category, style: const TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _cat.text = value ?? "";
+                      });
+                    },
+                    validator: (v) => (v == null || v.isEmpty) ? "Category is required" : null,
+                  ),
+                ),
+
                 Row(
                   children: [
                     Expanded(child: _buildField(_date, "Date (e.g. Jan 05)", Icons.calendar_today)),
