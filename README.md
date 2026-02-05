@@ -1,16 +1,46 @@
-# ueo_app
+🔹 **Title**
 
-A new Flutter project.
+University Event Organizer App (Flutter)
 
-## Getting Started
+🔹 **Overview**
+A comprehensive mobile application designed to streamline university event management by providing real-time updates, communication, ticket booking, and secure online payments.
 
-This project is a starting point for a Flutter application.
+🔹 **Features**
 
-A few resources to get you started if this is your first Flutter project:
+User authentication using Firebase
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Real-time event updates (Firestore)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Event creation & management
+
+Ticket booking system
+
+Online payments using Stripe
+
+Media upload via Cloudinary
+
+Clean and responsive UI
+
+🔹 **Tech Stack**
+
+Flutter & Dart
+
+Firebase Authentication
+
+Cloud Firestore
+
+Cloudinary
+
+Stripe API
+
+REST APIs
+
+🔹 **How to Run**
+
+Clone repository
+
+Install dependencies
+
+Configure Firebase & Stripe keys
+
+Run on emulator or device
